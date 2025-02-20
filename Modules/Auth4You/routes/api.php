@@ -19,4 +19,11 @@ Route::get('prueba', [S4BAuth4YouController::class, 'prueba']);
 Route::prefix('auth')->group(function () {
     Route::post('register', [S4BAuth4YouController::class, 'register']);
     Route::post('login', [S4BAuth4YouController::class, 'login']);
+    Route::post('forgot-password', [S4BAuth4YouController::class, 'forgotPassword']);
+    Route::post('reset-password', [S4BAuth4YouController::class, 'resetPassword']);
+
+    Route::middleware('auth:api')->group(function () {
+        Route::post('logout', [S4BAuth4YouController::class, 'logout']);
+        Route::get('me', [S4BAuth4YouController::class, 'me']);
+    });
 });

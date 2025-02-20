@@ -17,6 +17,7 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         parent::boot();
+        Route::aliasMiddleware('role', \Spatie\Permission\Middleware\RoleMiddleware::class);
     }
 
     /**
