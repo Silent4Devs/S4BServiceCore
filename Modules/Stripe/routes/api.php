@@ -20,24 +20,21 @@ Route::middleware(['stripe.key'])->group(function () {
             productos
         */
         Route::prefix('products')->group(function () {
-            Route::post('getProduct', [S4BStripeProductMetodController::class, 'S4BGetProductMethod']);
-            Route::post('getProductAll', [S4BStripeProductMetodController::class, 'S4BGetAllActiveProducts']);
+            Route::post('postProduct',                          [S4BStripeProductMetodController::class, 'S4BGetProductMethod']);
+            Route::post('postAllContractedProducts',            [S4BStripeProductMetodController::class, 'S4BPostProductsByCustomer']);
+            Route::post('postInactiveSubscriptionsByCustomer',  [S4BStripeProductMetodController::class, 'S4BPostInactiveSubscriptionsByCustomer']);
+            Route::get('getProductAll',                         [S4BStripeProductMetodController::class, 'S4BGetAllActiveProducts']);
+            Route::get('getUnpurchasedProducts',                [S4BStripeProductMetodController::class, 'S4BGetUnpurchasedProducts']);
         });
 
         /*
             metodos de pago
         */
-        Route::prefix('payment')->group(function () {
-            Route::post('getProduct', [S4BStripeProductMetodController::class, 'S4BGetProductMethod']);
-            Route::post('getProductAll', [S4BStripeProductMetodController::class, 'S4BGetAllActiveProducts']);
-        });
+        Route::prefix('payment')->group(function () {});
 
         /*
             historial
         */
-        Route::prefix('history')->group(function () {
-            Route::post('getProduct', [S4BStripeProductMetodController::class, 'S4BGetProductMethod']);
-            Route::post('getProductAll', [S4BStripeProductMetodController::class, 'S4BGetAllActiveProducts']);
-        });
+        Route::prefix('history')->group(function () {});
     });
 });

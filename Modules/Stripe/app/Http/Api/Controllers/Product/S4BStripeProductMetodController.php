@@ -21,7 +21,7 @@ class S4BStripeProductMetodController extends S4BBaseController
             $S4BIdProduct = $request->productId;
             $S4BProduct = $this->S4BStripeService->S4BGetProductDetailsById($S4BIdProduct);
 
-            return $this->S4BSendResponse($S4BProduct, 'Metodos de pagos correcto.');
+            return $this->S4BSendResponse($S4BProduct, 'Producto correcto.');
         } catch (\Exception $e) {
             return $this->S4BSendError($e, ['error' => $e]);
         }

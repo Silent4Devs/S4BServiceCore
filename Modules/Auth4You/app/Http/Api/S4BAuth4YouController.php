@@ -18,11 +18,20 @@ class S4BAuth4YouController extends S4BBaseController
     public function register(Request $request)
     {
         try {
+            $stripeKey = $request->header('STRIPE_KEY');
+
+            if (!$stripeKey) {
+                return response()->json(['error' => 'Stripe API Key es requerida'], 400);
+            }
+
+            \Stripe\Stripe::setApiKey($stripeKey);
+
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
             ]);
+
             if ($validator->fails()) {
                 return response()->json($validator->errors(), 422);
             }
@@ -33,15 +42,30 @@ class S4BAuth4YouController extends S4BBaseController
                 'password' => Hash::make($request->password),
             ]);
 
-            // Generar token de acceso usando Passport
-            $token = $user->createToken('Personal Access Token')->accessToken;
+            $stripeCustomer = \Stripe\Customer::create([
+                'name'  => $user->name,
+                'email' => $user->email,
+            ]);
 
-            $response = ['token' => $token, 'user' => $user];
-            return $this->S4BSendResponse($response, 'Login exitoso');
+            $user->stripe_customer_id = $stripeCustomer->id;
+            $user->save();
+
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->accessToken;
+            $expiration = $tokenResult->token->expires_at;
+
+            $response = [
+                'token' => $token,
+                'expires_at' => $expiration,
+                'user' => $user
+            ];
+
+            return $this->S4BSendResponse($response, 'Usuario registrado correctamente.');
         } catch (\Exception $e) {
-            return $this->S4BSendError($e, ['error' => $e]);
+            return $this->S4BSendError($e, ['error' => $e->getMessage()]);
         }
     }
+
 
     // Login
     public function login(Request $request)
@@ -59,9 +83,15 @@ class S4BAuth4YouController extends S4BBaseController
             $user = Auth::user();
 
             // Generar token de acceso con Passport
-            $token = $user->createToken('Personal Access Token')->accessToken;
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->accessToken;
+            $expiration = $tokenResult->token->expires_at;
 
-            $response = ['token' => $token, 'user' => $user];
+            $response = [
+                'token' => $token,
+                'expires_at' => $expiration,
+                'user' => $user
+            ];
             return $this->S4BSendResponse($response, 'Login exitoso');
         } catch (\Exception $e) {
             return $this->S4BSendError($e, ['error' => $e]);
