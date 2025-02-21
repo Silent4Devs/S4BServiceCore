@@ -2,11 +2,11 @@
 
 namespace Modules\Stripe\App\Http\Api\Controllers\Product;
 
-use Modules\Stripe\App\Http\Api\Controllers\S4BStripeBaseController;
+use App\Http\Controllers\S4BBaseController;
 use Modules\Stripe\App\Http\Api\Services\S4BStripeService;
 use Illuminate\Http\Request;
 
-class S4BStripeProductMetodController extends S4BStripeBaseController
+class S4BStripeProductMetodController extends S4BBaseController
 {
     protected $S4BStripeService;
 
@@ -18,7 +18,7 @@ class S4BStripeProductMetodController extends S4BStripeBaseController
     public function S4BGetProductMethod(Request $request)
     {
         try {
-            $S4BIdProduct = 'prod_QJoDHqbaelALBQ';
+            $S4BIdProduct = $request->productId;
             $S4BProduct = $this->S4BStripeService->S4BGetProductDetailsById($S4BIdProduct);
 
             return $this->S4BSendResponse($S4BProduct, 'Metodos de pagos correcto.');

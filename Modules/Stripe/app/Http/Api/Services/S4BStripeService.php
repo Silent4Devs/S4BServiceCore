@@ -194,6 +194,12 @@ class S4BStripeService
             $products = [];
 
             foreach ($allProducts->data as $product) {
+
+                $prices = \Stripe\Price::all(['product' => $product->id, 'limit' => 1]);
+
+                $price = $prices->data[0]->unit_amount ?? null;
+                $currency = $prices->data[0]->currency ?? null;
+
                 $products[] = [
                     'active' => $product->active,
                     'id' => $product->id,
@@ -201,6 +207,9 @@ class S4BStripeService
                     'name' => $product->name,
                     'description' => $product->description,
                     'img' => $product->metadata['img'] ?? null,
+                    'price' => $price ? $price / 100 : null,
+                    'currency' => strtoupper($currency),
+                    'marketing_features' => $product->marketing_features,
                 ];
             }
 
