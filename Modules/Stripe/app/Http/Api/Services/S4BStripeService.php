@@ -35,19 +35,11 @@ class S4BStripeService
         ]);
     }
 
-    /**
-     * Obtiene la instancia de StripeClient.
-     */
     public function S4BGetStripeClient(): StripeClient
     {
         return $this->S4BStripeClient;
     }
 
-    /**
-     * Obtiene un cliente de Stripe por su ID.
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BGetCustomerById(string $S4BCustomerId): Customer
     {
         try {
@@ -57,13 +49,6 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Obtiene las suscripciones de un cliente de Stripe.
-     *
-     * @return \Stripe\Collection
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BGetCustomerSubscriptions(string $S4BCustomerId)
     {
         try {
@@ -73,11 +58,6 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Obtiene el detalle de un producto de Stripe por su ID.
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BGetProductDetailsById(string $S4BProductId): Product
     {
         try {
@@ -87,12 +67,7 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Obtiene las suscripciones que no están activas para un cliente.
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
-    public function S4BGetInactiveSubscriptionsByCustomer(string $S4BCustomerId): array
+    public function S4BPostInactiveSubscriptionsByCustomer(string $S4BCustomerId): array
     {
         try {
             \Stripe\Customer::retrieve($S4BCustomerId);
@@ -111,7 +86,7 @@ class S4BStripeService
             $unsubscribedProducts = [];
 
             foreach ($S4BProducts->data as $product) {
-                if (! in_array($product->id, $subscribedProductIds)) {
+                if (!in_array($product->id, $subscribedProductIds)) {
                     $unsubscribedProducts[] = [
                         'id' => $product->id,
                         'name' => $product->name,
@@ -129,12 +104,7 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Obtiene todos los productos de un cliente a través de sus suscripciones.
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
-    public function S4BGetProductsByCustomer(string $S4BCustomerId): array
+    public function S4BPostProductsByCustomer(string $S4BCustomerId): array
     {
         try {
             \Stripe\Customer::retrieve($S4BCustomerId);
@@ -182,11 +152,69 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Obtiene todos los productos activos de Stripe.
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
+    public function S4BPostSubscriptionsActiveInactive(string $S4BCustomerId): array
+    {
+        try {
+            \Stripe\Customer::retrieve($S4BCustomerId);
+
+            $S4BSubscriptions = $this->S4BGetCustomerSubscriptions($S4BCustomerId);
+            $subscribedProductIds = [];
+            $subscribedProducts = [];
+
+            foreach ($S4BSubscriptions->data as $S4BSubscription) {
+                foreach ($S4BSubscription->items->data as $S4BItem) {
+                    $product = \Stripe\Product::retrieve($S4BItem->price->product);
+                    $price = \Stripe\Price::retrieve($S4BItem->price->id);
+                    $subscribedProductIds[] = $product->id;
+                    $subscribedProducts[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'active' => $product->active,
+                        'images' => $product->images,
+                        'img' => $product->metadata['img'] ?? null,
+                        'price' => [
+                            'amount' => $price->unit_amount / 100,
+                            'currency' => strtoupper($price->currency),
+                            'interval' => $price->recurring->interval ?? null,
+                        ],
+                        'subscription_start' => $S4BSubscription->start_date ? date('Y-m-d', $S4BSubscription->start_date) : null,
+                        'subscription_end' => $S4BSubscription->current_period_end ? date('Y-m-d', $S4BSubscription->current_period_end) : null,
+                    ];
+                }
+            }
+
+            $S4BProducts = \Stripe\Product::all(['active' => true]);
+            $unsubscribedProducts = [];
+
+            foreach ($S4BProducts->data as $product) {
+                if (!in_array($product->id, $subscribedProductIds)) {
+                    $price = \Stripe\Price::all(['product' => $product->id, 'limit' => 100])->data[0];
+                    $unsubscribedProducts[] = [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'description' => $product->description,
+                        'active' => $product->active,
+                        'images' => $product->images,
+                        'img' => $product->metadata['img'] ?? null,
+                        'price' => [
+                            'amount' => $price->unit_amount / 100,
+                            'currency' => strtoupper($price->currency),
+                            'interval' => $price->recurring->interval ?? null,
+                        ],
+                    ];
+                }
+            }
+            $S4BProductsAll = [
+                'subscribed_products' => $subscribedProducts,
+                'unsubscribed_products' => $unsubscribedProducts,
+            ];
+            return $S4BProductsAll;
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            throw new Exception('Error al obtener los productos del cliente: ' . $e->getMessage());
+        }
+    }
+
     public function S4BGetAllActiveProducts(): array
     {
         try {
@@ -219,13 +247,6 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Obtiene los productos no adquiridos por un cliente a través de sus suscripciones.
-     *
-     * @param  string  $S4BCustomerId
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BGetUnpurchasedProducts(): array
     {
         try {
@@ -275,33 +296,17 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Verifica el estado de suscripciones de un cliente para determinar si tiene acceso a los módulos válidos.
-     *
-     * Este método revisa las suscripciones activas de un cliente y valida si alguna de ellas coincide con los módulos
-     * válidos proporcionados. Si una suscripción activa pertenece a un módulo válido, el método devuelve `true`,
-     * de lo contrario, devuelve `false`. Si no hay suscripciones o las suscripciones no son válidas, también se devuelve `false`.
-     *
-     * @param  array  $S4BSuscripciones  Listado de las suscripciones del cliente.
-     * @param  array  $S4BModulosValidos  Módulos que se consideran válidos para el acceso.
-     * @return bool `true` si el cliente tiene acceso a uno de los módulos válidos, `false` en caso contrario.
-     *
-     * @throws \Throwable En caso de error inesperado, se aborta con un error 403.
-     */
     public function S4BTenantSubscriptionStatus($S4BSuscripciones, $S4BModulosValidos)
     {
         try {
-            if (! empty($S4BSuscripciones) && is_array($S4BSuscripciones)) {
+            if (!empty($S4BSuscripciones) && is_array($S4BSuscripciones)) {
                 foreach ($S4BSuscripciones as $S4BSuscripcion) {
                     if (in_array($S4BSuscripcion['name'], $S4BModulosValidos) && $S4BSuscripcion['active'] === true) {
                         return true;
-                    } else {
-                        return false;
                     }
                 }
-            } else {
-                return false;
             }
+            return false;
         } catch (\Throwable $S4BTh) {
             abort(403);
         }
@@ -314,7 +319,7 @@ class S4BStripeService
             $clientKeyApi = env('CLIENT_KEYAPI');
 
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $clientKeyApi); //"http://192.168.9.113/api/onPremise/clientes");
+            curl_setopt($ch, CURLOPT_URL, $clientKeyApi);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['uuid' => $clientKey]));
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -328,10 +333,6 @@ class S4BStripeService
             if (curl_errno($ch)) {
                 curl_close($ch);
                 return false;
-                // return response()->json([
-                //     'message' => 'Error al obtener los datos de la API externa',
-                //     'error' => curl_error($ch),
-                // ], 500);
             }
 
             curl_close($ch);
@@ -357,14 +358,6 @@ class S4BStripeService
         }
     }
 
-
-    /**
-     * Obtiene el historial de compras de un cliente.
-     *
-     * @return \Stripe\Collection
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BGetPurchaseHistory(string $S4BCustomerId)
     {
         try {
@@ -393,13 +386,6 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Obtiene las tarjetas guardadas de un cliente.
-     *
-     * @return \Stripe\Collection
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BGetSavedCards(string $S4BCustomerId)
     {
         try {
@@ -424,13 +410,6 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Agrega un nuevo método de pago para un cliente. se necesita agregar primero una tarjeta para asiciarlo
-     *
-     * @return \Stripe\PaymentMethod
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BAddPaymentMethod(string $S4BCustomerId, string $S4BPaymentMethodId)
     {
         try {
@@ -444,22 +423,9 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Agrega una tarjeta como método de pago para un cliente. agrega y aoscia metodo de pago
-     *
-     * @param  string  $S4BCustomerId  El ID del cliente en Stripe.
-     * @param  string  $cardNumber  El número de la tarjeta de crédito.
-     * @param  int  $expMonth  El mes de expiración de la tarjeta (1-12).
-     * @param  int  $expYear  El año de expiración de la tarjeta (4 dígitos).
-     * @param  string  $cvc  El código de seguridad de la tarjeta.
-     * @return \Stripe\PaymentMethod
-     *
-     * @throws Exception Si ocurre un error al agregar la tarjeta.
-     */
     public function S4BAddCard(string $S4BCustomerId, string $cardNumber, int $expMonth, int $expYear, string $cvc)
     {
         try {
-            // Crear el PaymentMethod para la tarjeta
             $paymentMethod = $this->S4BStripeClient->paymentMethods->create([
                 'type' => 'card',
                 'card' => [
@@ -470,7 +436,6 @@ class S4BStripeService
                 ],
             ]);
 
-            // Asociar el PaymentMethod al cliente
             $this->S4BStripeClient->paymentMethods->attach($paymentMethod->id, [
                 'customer' => $S4BCustomerId,
             ]);
@@ -481,11 +446,6 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Elimina un método de pago de un cliente.
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BRemovePaymentMethod(string $S4BPaymentMethodId)
     {
         try {
@@ -495,14 +455,6 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Obtiene la dirección de facturación de un cliente.
-     *
-     * @return array
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
-    // : array Se comento ya que la Api retorna un objeto
     public function S4BGeS4BillingAddress(string $S4BCustomerId)
     {
         try {
@@ -514,21 +466,11 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Agrega una nueva dirección de facturación para un cliente.
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BAddBillingAddress(string $S4BCustomerId, array $S4BBillingAddress): Customer
     {
         return $this->S4BUpdateBillingAddress($S4BCustomerId, $S4BBillingAddress);
     }
 
-    /**
-     * Elimina la dirección de facturación de un cliente.
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BRemoveBillingAddress(string $S4BCustomerId): Customer
     {
         try {
@@ -538,11 +480,6 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Actualiza la dirección de facturación de un cliente.
-     *
-     * @throws \Stripe\Exception\ApiErrorException
-     */
     public function S4BUpdateBillingAddress(string $S4BCustomerId, array $S4BBillingAddress): Customer
     {
         try {
@@ -552,20 +489,6 @@ class S4BStripeService
         }
     }
 
-    /**
-     * Crea una suscripción para varios productos de un cliente en Stripe.
-     *
-     * Este método permite crear una suscripción con múltiples productos seleccionados
-     * por un cliente en Stripe. Los productos se agregan usando los IDs de precio de
-     * cada producto, y la suscripción será configurada según el intervalo de pago
-     * definido en los precios de los productos.
-     *
-     * @param  string  $S4BCustomerId  El ID del cliente en Stripe.
-     * @param  array  $productPriceIds  Un arreglo de IDs de precios de los productos a suscribir.
-     * @return array Un arreglo con el ID de la sesión de Stripe y la URL para el pago en Stripe.
-     *
-     * @throws \Stripe\Exception\ApiErrorException Si ocurre un error en la API de Stripe.
-     */
     public function createSubscriptionForMultipleProducts(string $S4BCustomerId, array $productPriceIds): array
     {
         try {
