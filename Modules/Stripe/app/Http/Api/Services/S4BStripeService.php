@@ -174,9 +174,11 @@ class S4BStripeService
                         'images' => $product->images,
                         'img' => $product->metadata['img'] ?? null,
                         'price' => [
-                            'amount' => $price->unit_amount / 100,
-                            'currency' => strtoupper($price->currency),
-                            'interval' => $price->recurring->interval ?? null,
+                            [
+                                'amount' => $price->unit_amount / 100,
+                                'currency' => strtoupper($price->currency),
+                                'interval' => $price->recurring->interval ?? null,
+                            ]
                         ],
                         'subscription_start' => $S4BSubscription->start_date ? date('Y-m-d', $S4BSubscription->start_date) : null,
                         'subscription_end' => $S4BSubscription->current_period_end ? date('Y-m-d', $S4BSubscription->current_period_end) : null,
@@ -198,9 +200,11 @@ class S4BStripeService
                         'images' => $product->images,
                         'img' => $product->metadata['img'] ?? null,
                         'price' => [
-                            'amount' => $price->unit_amount / 100,
-                            'currency' => strtoupper($price->currency),
-                            'interval' => $price->recurring->interval ?? null,
+                            [
+                                'amount' => $price->unit_amount / 100,
+                                'currency' => strtoupper($price->currency),
+                                'interval' => $price->recurring->interval ?? null,
+                            ]
                         ],
                     ];
                 }
