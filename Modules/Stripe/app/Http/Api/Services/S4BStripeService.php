@@ -173,7 +173,7 @@ class S4BStripeService
                         'active' => $product->active,
                         'images' => $product->images,
                         'img' => $product->metadata['img'] ?? null,
-                        'price' => [
+                        'prices' => [
                             [
                                 'amount' => $price->unit_amount / 100,
                                 'currency' => strtoupper($price->currency),
@@ -199,7 +199,7 @@ class S4BStripeService
                         'active' => $product->active,
                         'images' => $product->images,
                         'img' => $product->metadata['img'] ?? null,
-                        'price' => [
+                        'prices' => [
                             [
                                 'amount' => $price->unit_amount / 100,
                                 'currency' => strtoupper($price->currency),
