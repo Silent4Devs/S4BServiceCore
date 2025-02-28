@@ -8,6 +8,7 @@ use Stripe\StripeClient;
 use Illuminate\Http\Request;
 use Stripe\Product;
 use Stripe\Customer;
+use Stripe\SetupIntent;
 
 class S4BStripeService
 {
@@ -546,6 +547,20 @@ class S4BStripeService
             ];
         } catch (\Stripe\Exception\ApiErrorException $e) {
             throw new Exception('No se pudo procesar la contratación: ' . $e->getMessage());
+        }
+    }
+
+    //pago
+    public function S4BCreateSetupIntent(string $S4BCustomerId)
+    {
+        try {
+            $setupIntent = SetupIntent::create([
+                'customer' => $S4BCustomerId,
+            ]);
+
+            return response()->json(['clientSecret' => $setupIntent->client_secret]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 }

@@ -36,6 +36,7 @@ Route::middleware(['stripe.key'])->group(function () {
             Route::post('paymentMethod',                        [S4BStripePaymentMetodController::class, 'S4BPostPaymentMethod']);
             Route::post('addPaymentMethod',                     [S4BStripePaymentMetodController::class, 'S4BAddPaymentMethod']);
             Route::post('addCardPaymentMethod',                 [S4BStripePaymentMetodController::class, 'S4BAddCardPaymentMethod']);
+            Route::post('createSetupIntent',                    [S4BStripePaymentMetodController::class, 'S4BPostCreateSetupIntent']);
         });
 
         /*

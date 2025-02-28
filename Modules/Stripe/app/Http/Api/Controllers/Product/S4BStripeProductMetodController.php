@@ -84,4 +84,16 @@ class S4BStripeProductMetodController extends S4BBaseController
             return $this->S4BSendError($e, ['error' => $e]);
         }
     }
+
+    public function S4BPostCreateSetupIntent(Request $request)
+    {
+        try {
+            $S4BCustomerId = $request->customerId;
+            $S4BProduct = $this->S4BStripeService->S4BCreateSetupIntent($S4BCustomerId);
+
+            return $this->S4BSendResponse($S4BProduct, 'SetupIntent creado correctamente.');
+        } catch (\Exception $e) {
+            return $this->S4BSendError($e, ['error' => $e]);
+        }
+    }
 }
