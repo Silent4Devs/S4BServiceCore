@@ -570,6 +570,11 @@ class S4BStripeService
     public function S4BProcessPayment(string $S4BCustomerId, string $paymentMethodId, int $amount, string $currency, string $priceId)
     {
         try {
+            // Validate the amount
+            if ($currency === 'mxn' && $amount < 1000) {
+                throw new Exception('El monto es menor 10.00', $amount);
+            }
+
             $customer = $this->S4BStripeClient->customers->retrieve($S4BCustomerId);
             $defaultPaymentMethod = $customer->invoice_settings->default_payment_method;
 
