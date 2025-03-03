@@ -570,7 +570,7 @@ class S4BStripeService
     public function S4BProcessPayment(string $S4BCustomerId, string $paymentMethodId, int $amount, string $currency, string $priceId)
     {
         try {
-            if ($currency === 'mxn' && $amount < 1000) {
+            if ($currency === 'mxn' && $amount * 100 < 1000) {
                 throw new Exception('El monto es menor 10.00', $amount);
             }
 
@@ -589,7 +589,7 @@ class S4BStripeService
 
             $paymentIntent = $this->S4BStripeClient->paymentIntents->create([
                 'customer' => $S4BCustomerId,
-                'amount' => $amount,
+                'amount' => $amount * 100,
                 'currency' => $currency,
                 'payment_method' => $paymentMethodId,
                 'confirm' => true,
