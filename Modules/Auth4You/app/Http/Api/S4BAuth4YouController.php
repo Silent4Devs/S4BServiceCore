@@ -18,7 +18,7 @@ class S4BAuth4YouController extends S4BBaseController
     public function register(Request $request)
     {
         try {
-            $stripeKey = $request->header('STRIPE_KEY');
+            $stripeKey = $request->header('STRIPE_SECRET');
 
             if (!$stripeKey) {
                 return response()->json(['error' => 'Stripe API Key es requerida'], 400);
