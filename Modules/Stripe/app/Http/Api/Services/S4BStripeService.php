@@ -177,6 +177,7 @@ class S4BStripeService
                         'img' => $product->metadata['img'] ?? null,
                         'prices' => [
                             [
+                                'id' => $price->id,
                                 'amount' => $price->unit_amount / 100,
                                 'currency' => strtoupper($price->currency),
                                 'interval' => $price->recurring->interval ?? null,
@@ -203,6 +204,7 @@ class S4BStripeService
                         'img' => $product->metadata['img'] ?? null,
                         'prices' => [
                             [
+                                'id' => $price->id,
                                 'amount' => $price->unit_amount / 100,
                                 'currency' => strtoupper($price->currency),
                                 'interval' => $price->recurring->interval ?? null,
