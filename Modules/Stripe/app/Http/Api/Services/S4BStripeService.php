@@ -568,13 +568,18 @@ class S4BStripeService
     public function S4BProcessPayment(string $S4BCustomerId, string $paymentMethodId, int $amount, string $currency)
     {
         try {
-            $this->S4BStripeClient->paymentMethods->attach($paymentMethodId, [
-                'customer' => $S4BCustomerId,
-            ]);
+            $customer = $this->S4BStripeClient->customers->retrieve($S4BCustomerId);
+            $defaultPaymentMethod = $customer->invoice_settings->default_payment_method;
 
-            $this->S4BStripeClient->customers->update($S4BCustomerId, [
-                'invoice_settings' => ['default_payment_method' => $paymentMethodId],
-            ]);
+            if ($defaultPaymentMethod !== $paymentMethodId) {
+                $this->S4BStripeClient->paymentMethods->attach($paymentMethodId, [
+                    'customer' => $S4BCustomerId,
+                ]);
+
+                $this->S4BStripeClient->customers->update($S4BCustomerId, [
+                    'invoice_settings' => ['default_payment_method' => $paymentMethodId],
+                ]);
+            }
 
             $paymentIntent = $this->S4BStripeClient->paymentIntents->create([
                 'customer' => $S4BCustomerId,
