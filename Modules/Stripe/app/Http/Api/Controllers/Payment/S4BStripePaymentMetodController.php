@@ -222,4 +222,19 @@ class S4BStripePaymentMetodController extends S4BBaseController
             return $this->S4BSendError($e, ['error' => $e]);
         }
     }
+
+    public function S4BPostProcessPaymentMethod(Request $request)
+    {
+        try {
+            $S4BCustomerId = $request->customerId;
+            $amount = $request->amount;
+            $currency = $request->currency;
+            $paymentMethodId = $request->paymentMethodId;
+            $S4BProduct = $this->S4BStripeService->S4BProcessPayment($S4BCustomerId, $paymentMethodId, $amount, $currency);
+
+            return $this->S4BSendResponse($S4BProduct, 'Pago correcto.');
+        } catch (\Exception $e) {
+            return $this->S4BSendError($e, ['error' => $e]);
+        }
+    }
 }

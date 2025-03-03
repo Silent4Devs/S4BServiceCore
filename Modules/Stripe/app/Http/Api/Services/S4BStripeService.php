@@ -8,6 +8,7 @@ use Stripe\StripeClient;
 use Illuminate\Http\Request;
 use Stripe\Product;
 use Stripe\Customer;
+use Stripe\PaymentIntent;
 use Stripe\SetupIntent;
 
 class S4BStripeService
@@ -558,7 +559,36 @@ class S4BStripeService
                 'customer' => $S4BCustomerId,
             ]);
 
-            return response()->json(['clientSecret' => $setupIntent->client_secret]);
+            return ['clientSecret' => $setupIntent->client_secret];
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function S4BProcessPayment(string $S4BCustomerId, string $paymentMethodId, int $amount, string $currency)
+    {
+        try {
+            $this->S4BStripeClient->paymentMethods->attach($paymentMethodId, [
+                'customer' => $S4BCustomerId,
+            ]);
+
+            $this->S4BStripeClient->customers->update($S4BCustomerId, [
+                'invoice_settings' => ['default_payment_method' => $paymentMethodId],
+            ]);
+
+            $paymentIntent = $this->S4BStripeClient->paymentIntents->create([
+                'customer' => $S4BCustomerId,
+                'amount' => $amount,
+                'currency' => $currency,
+                'payment_method' => $paymentMethodId,
+                'confirm' => true,
+                'off_session' => true,
+            ]);
+
+            return response()->json([
+                'clientSecret' => $paymentIntent->client_secret,
+                'status' => $paymentIntent->status
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
