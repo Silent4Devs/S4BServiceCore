@@ -565,7 +565,7 @@ class S4BStripeService
         }
     }
 
-    public function S4BProcessPayment(string $S4BCustomerId, string $paymentMethodId, int $amount, string $currency)
+    public function S4BProcessPayment(string $S4BCustomerId, string $paymentMethodId, int $amount, string $currency, string $priceId)
     {
         try {
             $customer = $this->S4BStripeClient->customers->retrieve($S4BCustomerId);
@@ -590,9 +590,18 @@ class S4BStripeService
                 'off_session' => true,
             ]);
 
+            $subscription = $this->S4BStripeClient->subscriptions->create([
+                'customer' => $S4BCustomerId,
+                'items' => [
+                    ['price' => $priceId],
+                ],
+                'default_payment_method' => $paymentMethodId,
+            ]);
+
             return response()->json([
                 'clientSecret' => $paymentIntent->client_secret,
-                'status' => $paymentIntent->status
+                'status' => $paymentIntent->status,
+                'subscription' => $subscription,
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
