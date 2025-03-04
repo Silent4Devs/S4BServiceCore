@@ -166,7 +166,17 @@ class S4BStripeService
             foreach ($S4BSubscriptions->data as $S4BSubscription) {
                 foreach ($S4BSubscription->items->data as $S4BItem) {
                     $product = \Stripe\Product::retrieve($S4BItem->price->product);
-                    $price = \Stripe\Price::retrieve($S4BItem->price->id);
+                    $prices = \Stripe\Price::all(['product' => $product->id]);
+
+                    $formattedPrices = array_map(function ($price) {
+                        return [
+                            'id' => $price->id,
+                            'amount' => $price->unit_amount / 100,
+                            'currency' => strtoupper($price->currency),
+                            'interval' => $price->recurring->interval ?? null,
+                        ];
+                    }, $prices->data);
+
                     $subscribedProductIds[] = $product->id;
                     $subscribedProducts[] = [
                         'id' => $product->id,
@@ -175,14 +185,7 @@ class S4BStripeService
                         'active' => $product->active,
                         'images' => $product->images,
                         'img' => $product->metadata['img'] ?? null,
-                        'prices' => [
-                            [
-                                'id' => $price->id,
-                                'amount' => $price->unit_amount / 100,
-                                'currency' => strtoupper($price->currency),
-                                'interval' => $price->recurring->interval ?? null,
-                            ]
-                        ],
+                        'prices' => $formattedPrices,
                         'subscription_start' => $S4BSubscription->start_date ? date('Y-m-d', $S4BSubscription->start_date) : null,
                         'subscription_end' => $S4BSubscription->current_period_end ? date('Y-m-d', $S4BSubscription->current_period_end) : null,
                     ];
@@ -194,7 +197,17 @@ class S4BStripeService
 
             foreach ($S4BProducts->data as $product) {
                 if (!in_array($product->id, $subscribedProductIds)) {
-                    $price = \Stripe\Price::all(['product' => $product->id, 'limit' => 100])->data[0];
+                    $prices = \Stripe\Price::all(['product' => $product->id]);
+
+                    $formattedPrices = array_map(function ($price) {
+                        return [
+                            'id' => $price->id,
+                            'amount' => $price->unit_amount / 100,
+                            'currency' => strtoupper($price->currency),
+                            'interval' => $price->recurring->interval ?? null,
+                        ];
+                    }, $prices->data);
+
                     $unsubscribedProducts[] = [
                         'id' => $product->id,
                         'name' => $product->name,
@@ -202,21 +215,16 @@ class S4BStripeService
                         'active' => $product->active,
                         'images' => $product->images,
                         'img' => $product->metadata['img'] ?? null,
-                        'prices' => [
-                            [
-                                'id' => $price->id,
-                                'amount' => $price->unit_amount / 100,
-                                'currency' => strtoupper($price->currency),
-                                'interval' => $price->recurring->interval ?? null,
-                            ]
-                        ],
+                        'prices' => $formattedPrices,
                     ];
                 }
             }
+
             $S4BProductsAll = [
                 'subscribed_products' => $subscribedProducts,
                 'unsubscribed_products' => $unsubscribedProducts,
             ];
+
             return $S4BProductsAll;
         } catch (\Stripe\Exception\ApiErrorException $e) {
             throw new Exception('Error al obtener los productos del cliente: ' . $e->getMessage());
@@ -230,11 +238,16 @@ class S4BStripeService
             $products = [];
 
             foreach ($allProducts->data as $product) {
+                $prices = \Stripe\Price::all(['product' => $product->id]);
 
-                $prices = \Stripe\Price::all(['product' => $product->id, 'limit' => 1]);
-
-                $price = $prices->data[0]->unit_amount ?? null;
-                $currency = $prices->data[0]->currency ?? null;
+                $formattedPrices = array_map(function ($price) {
+                    return [
+                        'id' => $price->id,
+                        'amount' => $price->unit_amount / 100,
+                        'currency' => strtoupper($price->currency),
+                        'interval' => $price->recurring->interval ?? null,
+                    ];
+                }, $prices->data);
 
                 $products[] = [
                     'active' => $product->active,
@@ -243,9 +256,7 @@ class S4BStripeService
                     'name' => $product->name,
                     'description' => $product->description,
                     'img' => $product->metadata['img'] ?? null,
-                    'price' => $price ? $price / 100 : null,
-                    'currency' => strtoupper($currency),
-                    'marketing_features' => $product->marketing_features,
+                    'prices' => $formattedPrices,
                 ];
             }
 
