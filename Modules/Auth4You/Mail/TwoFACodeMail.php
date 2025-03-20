@@ -20,7 +20,7 @@ class TwoFACodeMail extends Mailable
     public function build()
     {
         return $this->subject('Tu código 2FA')
-            ->view('auth4you.emails.two_fa_code')
+            ->view('auth4you.emails.2fa-code')
             ->with(['code' => $this->code]);
     }
 }

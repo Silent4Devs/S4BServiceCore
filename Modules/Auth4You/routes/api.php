@@ -23,11 +23,14 @@ Route::prefix('auth')->group(function () {
     Route::post('reset-password',           [S4BAuth4YouController::class, 'resetPassword']);
 
     Route::post('verify-2fa',               [S4BAuth4YouController::class, 'verify2FA']);
-    Route::post('enable-2fa',               [S4BAuth4YouController::class, 'disable2FA']);
-    Route::post('disable-2fa',              [S4BAuth4YouController::class, 'enable2FA']);
+    Route::post('disable-2fa',               [S4BAuth4YouController::class, 'disable2FA']);
+    Route::post('enable-2fa',              [S4BAuth4YouController::class, 'enable2FA']);
 
     Route::middleware('auth:api')->group(function () {
-        Route::post('logout', [S4BAuth4YouController::class, 'logout']);
+        Route::post('logout',                   [S4BAuth4YouController::class, 'logout']);
+        Route::post('verify-2fa',               [S4BAuth4YouController::class, 'verify2FA']);
+        Route::post('disable-2fa',              [S4BAuth4YouController::class, 'disable2FA']);
+        Route::post('enable-2fa',               [S4BAuth4YouController::class, 'enable2FA']);
         Route::get('me', [S4BAuth4YouController::class, 'me']);
     });
 });
