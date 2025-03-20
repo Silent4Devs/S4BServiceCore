@@ -15,6 +15,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "nwidart/laravel-modules": "^11.1",
+        "pragmarx/google2fa": "^8.0",
         "spatie/laravel-permission": "^6.15",
         "stripe/stripe-php": "^16.5"
     },

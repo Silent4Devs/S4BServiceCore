@@ -23,6 +23,9 @@ class S4BUserEntities extends Authenticatable
         'name',
         'email',
         'password',
+        'otp_enabled',
+        'otp_code',
+        'otp_expires_at',
     ];
 
     /**
@@ -45,6 +48,8 @@ class S4BUserEntities extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'otp_enabled' => 'boolean',
+            'otp_expires_at' => 'datetime',
         ];
     }
 }
