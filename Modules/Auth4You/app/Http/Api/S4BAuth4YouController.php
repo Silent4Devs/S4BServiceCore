@@ -103,6 +103,11 @@ class S4BAuth4YouController extends S4BBaseController
 
             $user = Auth::user();
 
+            // Generar token de acceso con Passport
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->accessToken;
+            $expiration = $tokenResult->token->expires_at;
+
             if ($user->otp_enabled) {
                 $twoFACode = rand(100000, 999999);
                 $user->otp_code = $twoFACode;
@@ -111,13 +116,14 @@ class S4BAuth4YouController extends S4BBaseController
 
                 Mail::to($user->email)->send(new TwoFACodeMail($twoFACode));
 
-                return $this->S4BSendResponse([], 'Código 2FA enviado a su correo electrónico.');
-            }
+                $response = [
+                    'token' => $token,
+                    'expires_at' => $expiration,
+                    'user' => $user
+                ];
 
-            // Generar token de acceso con Passport
-            $tokenResult = $user->createToken('Personal Access Token');
-            $token = $tokenResult->accessToken;
-            $expiration = $tokenResult->token->expires_at;
+                return $this->S4BSendResponse($response, 'Código 2FA enviado a su correo electrónico.');
+            }
 
             $response = [
                 'token' => $token,
