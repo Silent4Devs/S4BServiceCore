@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('user', function (Blueprint $table) {
+        Schema::connection('auth_db')->table('users', function (Blueprint $table) {
             $table->string('stripe_customer_id')->nullable()->after('password');
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('user', function (Blueprint $table) {
+        Schema::connection('auth_db')->table('users', function (Blueprint $table) {
             $table->dropColumn('stripe_customer_id');
         });
     }

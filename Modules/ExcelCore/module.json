@@ -1,0 +1,11 @@
+{
+    "name": "ExcelCore",
+    "alias": "excelcore",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ExcelCore\\Providers\\ExcelCoreServiceProvider"
+    ],
+    "files": []
+}
