@@ -1,5 +1,5 @@
 {
     "Auth4You": true,
     "Stripe": true,
-    "ExcelCore": true
+    "RenderCore": true
 }

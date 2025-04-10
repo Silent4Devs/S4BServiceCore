@@ -1,5 +1,5 @@
 {
-    "name": "nwidart/excelcore",
+    "name": "nwidart/rendercore",
     "description": "",
     "authors": [
         {
@@ -17,14 +17,14 @@
     },
     "autoload": {
         "psr-4": {
-            "Modules\\ExcelCore\\": "app/",
-            "Modules\\ExcelCore\\Database\\Factories\\": "database/factories/",
-            "Modules\\ExcelCore\\Database\\Seeders\\": "database/seeders/"
+            "Modules\\RenderCore\\": "app/",
+            "Modules\\RenderCore\\Database\\Factories\\": "database/factories/",
+            "Modules\\RenderCore\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Modules\\ExcelCore\\Tests\\": "tests/"
+            "Modules\\RenderCore\\Tests\\": "tests/"
         }
     }
 }

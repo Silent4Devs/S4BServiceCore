@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\ExcelCore\Http\Controllers\ExcelCoreController;
+use Modules\RenderCore\App\Http\Api\Controllers\ExcelExportController;
+use Modules\RenderCore\Http\Controllers\RenderCoreController;
 
 /*
  *--------------------------------------------------------------------------
@@ -15,5 +16,14 @@ use Modules\ExcelCore\Http\Controllers\ExcelCoreController;
 */
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('excelcore', ExcelCoreController::class)->names('excelcore');
+    Route::apiResource('rendercore', RenderCoreController::class)->names('rendercore');
+});
+
+Route::prefix('render')->group(function () {
+    /*
+        excel
+    */
+    Route::prefix('excel')->group(function () {
+        Route::post('excelExport',                          [ExcelExportController::class, 'export']);
+    });
 });

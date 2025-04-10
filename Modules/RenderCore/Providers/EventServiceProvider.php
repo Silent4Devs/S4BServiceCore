@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\ExcelCore\Providers;
+namespace Modules\RenderCore\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 

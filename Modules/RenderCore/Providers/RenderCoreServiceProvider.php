@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\ExcelCore\Providers;
+namespace Modules\RenderCore\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
@@ -8,13 +8,13 @@ use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
-class ExcelCoreServiceProvider extends ServiceProvider
+class RenderCoreServiceProvider extends ServiceProvider
 {
     use PathNamespace;
 
-    protected string $name = 'ExcelCore';
+    protected string $name = 'RenderCore';
 
-    protected string $nameLower = 'excelcore';
+    protected string $nameLower = 'rendercore';
 
     /**
      * Boot the application events.

@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\ExcelCore\Http\Controllers\ExcelCoreController;
+use Modules\RenderCore\Http\Controllers\RenderCoreController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,5 +15,5 @@ use Modules\ExcelCore\Http\Controllers\ExcelCoreController;
 */
 
 Route::group([], function () {
-    Route::resource('excelcore', ExcelCoreController::class)->names('excelcore');
+    Route::resource('rendercore', RenderCoreController::class)->names('rendercore');
 });

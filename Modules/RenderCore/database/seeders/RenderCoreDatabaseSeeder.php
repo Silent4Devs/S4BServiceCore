@@ -1,10 +1,10 @@
 <?php
 
-namespace Modules\ExcelCore\Database\Seeders;
+namespace Modules\RenderCore\Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-class ExcelCoreDatabaseSeeder extends Seeder
+class RenderCoreDatabaseSeeder extends Seeder
 {
     /**
      * Run the database seeds.

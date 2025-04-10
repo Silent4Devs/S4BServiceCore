@@ -1,13 +1,13 @@
 <?php
 
-namespace Modules\ExcelCore\Providers;
+namespace Modules\RenderCore\Providers;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    protected string $name = 'ExcelCore';
+    protected string $name = 'RenderCore';
 
     /**
      * Called before routes are registered.

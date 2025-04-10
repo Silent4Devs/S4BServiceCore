@@ -14,6 +14,7 @@
         "laravel/passport": "^12.4",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "maatwebsite/excel": "^3.1",
         "nwidart/laravel-modules": "^11.1",
         "pragmarx/google2fa": "^8.0",
         "spatie/laravel-permission": "^6.15",

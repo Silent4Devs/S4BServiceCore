@@ -1,18 +1,18 @@
 <?php
 
-namespace Modules\ExcelCore\Http\Controllers;
+namespace Modules\RenderCore\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class ExcelCoreController extends Controller
+class RenderCoreController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('excelcore::index');
+        return view('rendercore::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class ExcelCoreController extends Controller
      */
     public function create()
     {
-        return view('excelcore::create');
+        return view('rendercore::create');
     }
 
     /**
@@ -36,7 +36,7 @@ class ExcelCoreController extends Controller
      */
     public function show($id)
     {
-        return view('excelcore::show');
+        return view('rendercore::show');
     }
 
     /**
@@ -44,7 +44,7 @@ class ExcelCoreController extends Controller
      */
     public function edit($id)
     {
-        return view('excelcore::edit');
+        return view('rendercore::edit');
     }
 
     /**
