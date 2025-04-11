@@ -27,6 +27,7 @@ class RenderCoreServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+        $this->loadViewsFrom(__DIR__.'/../../Resources/views', 'rendercore');
     }
 
     /**

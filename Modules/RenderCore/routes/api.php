@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\RenderCore\App\Http\Api\Controllers\ExcelExportController;
-use Modules\RenderCore\Http\Controllers\RenderCoreController;
+use Modules\RenderCore\App\Http\Api\Controllers\PdfExportController;
 
 /*
  *--------------------------------------------------------------------------
@@ -16,7 +16,6 @@ use Modules\RenderCore\Http\Controllers\RenderCoreController;
 */
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('rendercore', RenderCoreController::class)->names('rendercore');
 });
 
 Route::prefix('render')->group(function () {
@@ -26,4 +25,13 @@ Route::prefix('render')->group(function () {
     Route::prefix('excel')->group(function () {
         Route::post('excelExport',                          [ExcelExportController::class, 'export']);
     });
+
+    /*
+        pdf
+    */
+    Route::prefix('pdf')->group(function () {
+        Route::post('pdfExport',                            [PdfExportController::class, 'export']);
+    });
+
+
 });

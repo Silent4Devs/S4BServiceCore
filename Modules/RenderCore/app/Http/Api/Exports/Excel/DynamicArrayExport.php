@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\RenderCore\App\Http\Api\Export\Excel;
+namespace Modules\RenderCore\App\Http\Api\Exports\Excel;
 
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
