@@ -257,6 +257,7 @@ class S4BStripeService
                     'description' => $product->description,
                     'img' => $product->metadata['img'] ?? null,
                     'metadata' => $product->metadata,
+                    'marketing_features' => $product->marketing_features,
                     'prices' => $formattedPrices,
                 ];
             }
