@@ -32,6 +32,7 @@ class S4BAuth4YouController extends S4BBaseController
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
+                'role_id' => 'required|exists:roles,id',
             ]);
 
             if ($validator->fails()) {
@@ -42,6 +43,7 @@ class S4BAuth4YouController extends S4BBaseController
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'role_id' => $request->role_id,
             ]);
 
             $stripeCustomer = \Stripe\Customer::create([
@@ -51,6 +53,8 @@ class S4BAuth4YouController extends S4BBaseController
 
             $user->stripe_customer_id = $stripeCustomer->id;
             $user->save();
+
+            $user->assignRole($request->role_id);
 
             $tokenResult = $user->createToken('Personal Access Token');
             $token = $tokenResult->accessToken;
