@@ -131,13 +131,12 @@ class Course extends Model implements Auditable
 
     public function instructor()
     {
-        return $this->belongsTo('App\Models\User', 'empleado_id')->select('id', 'name', 'email', 'empleado_id', 'n_empleado')->with('empleado:id,name,email,area_id,puesto_id,foto,n_empleado');
+        return $this->belongsTo('App\Models\User', 'instructor_id')->select('id', 'name', 'email', 'instructor_id');
     }
 
     public function user()
     {
-
-        return $this->belongsTo('App\Models\User', 'empleado_id')->select('id', 'name', 'email', 'empleado_id', 'n_empleado');
+        return $this->belongsTo('App\Models\User', 'instructor_id')->select('id', 'name', 'email', 'instructor_id');
     }
 
     public function level()
@@ -199,13 +198,13 @@ class Course extends Model implements Auditable
     {
         $certificado_general = Organizacion::select('certificado')->first()->certificado;
 
-        return asset('img/escuela/certificaciones/certificado'.$certificado_general.'.png');
+        return asset('img/escuela/certificaciones/certificado' . $certificado_general . '.png');
     }
 
     public function getFirmaInstructorRutaAttribute()
     {
         if ($this->firma_instructor) {
-            return asset('storage/cursos/firmas-instructores/'.$this->firma_instructor);
+            return asset('storage/cursos/firmas-instructores/' . $this->firma_instructor);
         } else {
             return null;
         }

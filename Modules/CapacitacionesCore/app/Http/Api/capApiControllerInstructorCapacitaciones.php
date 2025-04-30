@@ -22,8 +22,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
-class tbApiControllerInstructorCapacitaciones extends Controller
+class capApiControllerInstructorCapacitaciones extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -47,32 +48,105 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         return $url;
     }
 
-    public function tbFunctionIndexCurso()
+    private function formatEvaluationData($evaluation)
     {
+        $evaluationData = [
+            'id_evaluation' => $evaluation->id,
+            'name_evaluation' => $evaluation->name,
+            'evaluation_blocked' => false,
+            'questions' => $this->formatQuestions($evaluation)
+        ];
+
+        return $evaluationData;
+    }
+
+    private function formatQuestions($evaluation)
+    {
+        $questionsData = [];
+        foreach ($evaluation->questions->shuffle() as $question) {
+            $questionsData[] = [
+                'id_question' => $question->id,
+                'question' => $question->question,
+                'is_active' => $question->is_active,
+                'answers' => $this->formatAnswers($question->answers),
+            ];
+        }
+        return $questionsData;
+    }
+
+    private function formatQuestion($question)
+    {
+        $questionsData = [];
+
+        $questionsData[] = [
+            'id_question' => $question->id,
+            'question' => $question->question,
+            'is_active' => $question->is_active,
+            'answers' => $this->formatAnswers($question->answers),
+        ];
+        return $questionsData;
+    }
+
+    private function formatAnswers($answers, $selectedAnswerId = null, $isCorrect = false)
+    {
+        $answersData = [];
+        foreach ($answers as $answer) {
+            $answersData[] = [
+                "id_answer" => $answer->id,
+                "answer" => $answer->answer,
+                "is_correct" => $selectedAnswerId === $answer->id
+                    ? (bool) $isCorrect
+                    : (bool) $answer->is_correct,
+                "selected" => $selectedAnswerId === $answer->id,
+            ];
+        }
+        return $answersData;
+    }
+
+    /**
+     * Display a listing of the courses for the current user.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionIndexCurso()
+    {
+        // Get the current user
+        $currentUser = User::getCurrentUser();
+
+        // Fetch courses for the current user, ordered by the latest
         $courses = Course::select('id', 'title', 'slug', 'subtitle', 'description', 'category_id', 'level_id', 'user_id', 'instructor_id')
-            ->where('user_id', User::getCurrentUser()->id)
+            ->where('user_id', $currentUser->id)
             ->latest('id')
             ->get()
             ->toArray();
 
+        // Return the courses as a JSON response
         return response()->json([
             'courses' => $courses,
         ]);
     }
 
-    public function tbFunctionCreateCurso()
+    /**
+     * Display the form for creating a new course.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionCreateCurso()
     {
+        // Fetch categories and levels
         $categories = Category::pluck('name', 'id');
         $levels = Level::pluck('name', 'id');
 
+        // Fetch active users
         $usuarios = User::where('estatus', 'alta')
             ->get()
             ->map(fn($usuario) => [
                 'id' => $usuario->id,
                 'name' => $usuario->name
             ])
-            ->values(); // Para reindexar los índices del array
+            ->values(); // Reindex the array
 
+        // Return the data as a JSON response
         return response()->json([
             'categorias' => $categories,
             'niveles' => $levels,
@@ -80,10 +154,18 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionStoreCurso(Request $request)
+    /**
+     * Store a newly created course in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionStoreCurso(Request $request)
     {
+        // Get the current user
         $user = User::getCurrentUser();
 
+        // Validate the request data
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'slug' => [
@@ -91,7 +173,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
                 'string',
                 'max:255',
                 Rule::unique('courses')->where(function ($query) {
-                    return $query->whereNull('deleted_at'); // Solo considera los cursos no eliminados
+                    return $query->whereNull('deleted_at'); // Only consider non-deleted courses
                 })
             ],
             'subtitle' => 'required|string|max:255',
@@ -103,7 +185,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ], [
             'subtitle.required' => 'El campo subtitulo es obligatorio',
             'slug.required' => 'El campo slug es obligatorio',
-            'slug.unique' => 'Este slug ya está en uso', // Mensaje personalizado para la unicidad
+            'slug.unique' => 'Este slug ya está en uso', // Custom message for uniqueness
             'title.required' => 'El campo titulo es obligatorio',
             'category_id.required' => 'El campo categoría es obligatorio',
             'description.required' => 'El campo descripción es obligatorio',
@@ -111,6 +193,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
             'instructor_id.required' => 'El campo instructor es obligatorio',
         ]);
 
+        // If validation fails, return a JSON response with the errors
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
@@ -118,6 +201,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
             ], 422);
         }
 
+        // Create the course
         $course = Course::create([
             'title' => $request->title,
             'slug' => $request->slug,
@@ -129,41 +213,53 @@ class tbApiControllerInstructorCapacitaciones extends Controller
             'instructor_id' => $request->instructor_id,
         ]);
 
-        // if ($request->hasFile('file')) {
-        //     $image = $request->file('file');
-        //     Storage::put('public/cursos', $image);
-        //     $url = '/storage/cursos/'.$image->hashName();
-        //     $course->image()->create([
-        //         'url' => $url,
-        //     ]);
-        // }
+        // Handle file upload if present
+        if ($request->hasFile('file')) {
+            $image = $request->file('file');
+            Storage::put('public/cursos', $image);
+            $url = '/storage/cursos/' . $image->hashName();
+            $course->image()->create([
+                'url' => $url,
+            ]);
+        }
 
-        // Si la validación pasa, continuar con la lógica normal
+        // Return success response
         return response()->json([
             'status' => 'success',
             'message' => 'Curso creado exitosamente'
         ]);
     }
 
-    public function tbFunctionEditCurso($id_course)
+    /**
+     * Display the specified course for editing.
+     *
+     * @param int $id_course
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionEditCurso($id_course)
     {
+        // Fetch the course by ID
         $course = Course::where('id', $id_course)
             ->select('id', 'title', 'slug', 'subtitle', 'description', 'category_id', 'level_id', 'user_id', 'instructor_id')
-            ->first(); // Obtener un solo registro
+            ->first(); // Get a single record
 
-        $courseArray = $course ? $course->toArray() : []; // Convertir a array o devolver vacío si no existe
+        // Convert to array or return empty if not found
+        $courseArray = $course ? $course->toArray() : [];
 
+        // Fetch categories and levels
         $categories = Category::pluck('name', 'id');
         $levels = Level::pluck('name', 'id');
 
+        // Fetch active users
         $usuarios = User::where('estatus', 'alta')
             ->get()
             ->map(fn($usuario) => [
                 'id' => $usuario->id,
                 'name' => $usuario->name
             ])
-            ->values(); // Para reindexar los índices del array
+            ->values(); // Reindex the array
 
+        // Return the data as a JSON response
         return response()->json([
             'courseArray' => $courseArray,
             'categorias' => $categories,
@@ -172,10 +268,19 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionUpdateCurso(Request $request, $id_course)
+    /**
+     * Update the specified course in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id_course
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionUpdateCurso(Request $request, $id_course)
     {
+        // Fetch the course by ID
         $course = Course::where('id', $id_course)->first();
 
+        // Validate the request data
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'slug' => [
@@ -183,7 +288,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
                 'string',
                 'max:255',
                 Rule::unique('courses')->ignore($course->id)->where(function ($query) {
-                    return $query->whereNull('deleted_at'); // Ignora registros eliminados
+                    return $query->whereNull('deleted_at'); // Ignore deleted records
                 }),
             ],
             'subtitle' => 'required|string|max:255',
@@ -196,7 +301,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ], [
             'subtitle.required' => 'El campo subtítulo es obligatorio',
             'slug.required' => 'El campo slug es obligatorio',
-            'slug.unique' => 'Este slug ya está en uso', // Mensaje personalizado
+            'slug.unique' => 'Este slug ya está en uso', // Custom message
             'title.required' => 'El campo título es obligatorio',
             'category_id.required' => 'El campo categoría es obligatorio',
             'description.required' => 'El campo descripción es obligatorio',
@@ -204,6 +309,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
             'instructor_id.required' => 'El campo instructor es obligatorio',
         ]);
 
+        // If validation fails, return a JSON response with the errors
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
@@ -211,6 +317,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
             ], 422);
         }
 
+        // Update the course
         $course->update([
             'title' => $request->title,
             'slug' => $request->slug,
@@ -221,23 +328,24 @@ class tbApiControllerInstructorCapacitaciones extends Controller
             'instructor_id' => $request->instructor_id,
         ]);
 
-        // if ($request->hasFile('file')) {
-        //     $image = $request->file('file');
-        //     Storage::put('public/cursos', $image);
-        //     $url = '/storage/cursos/'.$image->hashName();
-        //     $course->image()->create([
-        //         'url' => $url,
-        //     ]);
-        // }
+        // Handle file upload if present
+        if ($request->hasFile('file')) {
+            $image = $request->file('file');
+            Storage::put('public/cursos', $image);
+            $url = '/storage/cursos/' . $image->hashName();
+            $course->image()->create([
+                'url' => $url,
+            ]);
+        }
 
-        // Si la validación pasa, continuar con la lógica normal
+        // Return success response
         return response()->json([
             'status' => 'success',
             'message' => 'Curso modificado exitosamente'
         ]);
     }
 
-    public function tbFunctionShowCurso($id_course)
+    public function capFunctionShowCurso($id_course)
     {
         $course = Course::where('id', $id_course)
             ->select('id', 'title', 'slug', 'subtitle', 'description', 'category_id', 'level_id', 'user_id', 'instructor_id')
@@ -250,7 +358,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionDeleteCurso($id_course)
+    public function capFunctionDeleteCurso($id_course)
     {
         $course = Course::where('id', $id_course)
             ->first(); // Obtener un solo registro
@@ -263,7 +371,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionIndexGoals($id_course)
+    public function capFunctionIndexGoals($id_course)
     {
         $course = Course::where('id', $id_course)
             ->select('id', 'title', 'slug', 'subtitle', 'description', 'category_id', 'level_id', 'user_id', 'instructor_id')
@@ -287,7 +395,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionStoreGoals(Request $request, $id_course)
+    public function capFunctionStoreGoals(Request $request, $id_course)
     {
         $course = Course::where('id', $id_course)->first(); // Obtener un solo registro
 
@@ -315,7 +423,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionEditGoals($id_goal)
+    public function capFunctionEditGoals($id_goal)
     {
         $goal = Goal::where('id', $id_goal)
             ->select('id', 'name', 'course_id')
@@ -328,7 +436,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionUpdateGoals(Request $request, $id_goal)
+    public function capFunctionUpdateGoals(Request $request, $id_goal)
     {
         $goal = Goal::where('id', $id_goal)->first(); // Obtener un solo registro
 
@@ -355,7 +463,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionDeleteGoals($id_goal)
+    public function capFunctionDeleteGoals($id_goal)
     {
         $goal = Goal::where('id', $id_goal)->first(); // Obtener un solo registro
 
@@ -367,7 +475,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionIndexRequirements($id_course)
+    public function capFunctionIndexRequirements($id_course)
     {
         $course = Course::where('id', $id_course)
             ->select('id', 'title', 'slug', 'subtitle', 'description', 'category_id', 'level_id', 'user_id', 'instructor_id')
@@ -390,7 +498,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionStoreRequirements(Request $request, $id_course)
+    public function capFunctionStoreRequirements(Request $request, $id_course)
     {
         $course = Course::where('id', $id_course)->first(); // Obtener un solo registro
 
@@ -418,7 +526,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionEditRequirements($id_requirement)
+    public function capFunctionEditRequirements($id_requirement)
     {
         $requirement = Requirement::where('id', $id_requirement)
             ->select('id', 'name', 'course_id')
@@ -431,7 +539,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionUpdateRequirements(Request $request, $id_requirement)
+    public function capFunctionUpdateRequirements(Request $request, $id_requirement)
     {
         $requirement = Requirement::where('id', $id_requirement)->first(); // Obtener un solo registro
 
@@ -458,7 +566,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionDeleteRequirements($id_requirement)
+    public function capFunctionDeleteRequirements($id_requirement)
     {
         $requirement = Requirement::where('id', $id_requirement)->first(); // Obtener un solo registro
 
@@ -470,7 +578,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionIndexAudience($id_course)
+    public function capFunctionIndexAudience($id_course)
     {
         $course = Course::where('id', $id_course)
             ->select('id', 'title', 'slug', 'subtitle', 'description', 'category_id', 'level_id', 'user_id', 'instructor_id')
@@ -494,7 +602,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionStoreAudience(Request $request, $id_course)
+    public function capFunctionStoreAudience(Request $request, $id_course)
     {
         $course = Course::where('id', $id_course)->first(); // Obtener un solo registro
 
@@ -522,7 +630,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionEditAudience($id_audience)
+    public function capFunctionEditAudience($id_audience)
     {
         $audience = Audience::where('id', $id_audience)
             ->select('id', 'name', 'course_id')
@@ -535,7 +643,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionUpdateAudience(Request $request, $id_audience)
+    public function capFunctionUpdateAudience(Request $request, $id_audience)
     {
         $audience = Audience::where('id', $id_audience)->first(); // Obtener un solo registro
 
@@ -562,7 +670,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionDeleteAudience($id_audience)
+    public function capFunctionDeleteAudience($id_audience)
     {
         $audience = Audience::where('id', $id_audience)->first(); // Obtener un solo registro
 
@@ -574,7 +682,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionIndexEstudiantes($id_course)
+    public function capFunctionIndexEstudiantes($id_course)
     {
         // Obtener información del curso
         $course = Course::select('id', 'title', 'slug', 'subtitle', 'description', 'category_id', 'level_id', 'user_id', 'instructor_id')
@@ -624,7 +732,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
     }
 
 
-    public function tbFunctionStoreEstudiantes(Request $request, $id_course)
+    public function capFunctionStoreEstudiantes(Request $request, $id_course)
     {
         // Obtener el curso
         $course = Course::find($id_course);
@@ -696,7 +804,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ], 400);
     }
 
-    public function tbFunctionDeleteEstudiantes(Request $request)
+    public function capFunctionDeleteEstudiantes(Request $request)
     {
 
         $cursoUsuario = UsuariosCursos::where('id', $request->id_student)->first();
@@ -710,7 +818,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         }
     }
 
-    public function tbFunctionMultipleDeleteEstudiantes(Request $request)
+    public function capFunctionMultipleDeleteEstudiantes(Request $request)
     {
         $array_students = $request->input('students');
 
@@ -728,7 +836,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionAllDeleteEstudiantes($id_course)
+    public function capFunctionAllDeleteEstudiantes($id_course)
     {
 
         $cursoUsuarios = UsuariosCursos::where('course_id', $id_course)->get();
@@ -745,7 +853,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionIndexSeccionesCurso($id_course)
+    public function capFunctionIndexSeccionesCurso($id_course)
     {
         $course = Course::with(['instructor', 'teacher', 'user', 'sections_order.lessons'])
             ->where('id', $id_course)
@@ -780,12 +888,12 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         return response()->json(['data' => $data], 200);
     }
 
-    public function tbFunctionStoreSeccionesCurso(Request $request, $id_course)
+    public function capFunctionStoreSeccionesCurso(Request $request, $id_course)
     {
         $course = Course::select(['id', 'title', 'slug', 'subtitle', 'description', 'category_id', 'level_id', 'user_id', 'instructor_id'])
             ->findOrFail($id_course);
 
-        $this->saveSections($request->input('sections', []), $request->input('lessons', []), $id_course);
+        $this->capFunctionSaveSections($request->input('sections', []), $request->input('lessons', []), $id_course);
 
         return response()->json([
             'status' => 'success',
@@ -793,7 +901,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function saveSections($sections, $lessons, $cursoID)
+    public function capFunctionSaveSections($sections, $lessons, $cursoID)
     {
         DB::beginTransaction();
         try {
@@ -813,7 +921,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
                 $sectionIds[] = "seccion-" . $sec->id; // Agrega el ID en el formato correcto
 
                 // Guardar las lecciones dentro de la sección
-                $this->saveLessons($sec->id, collect($lessons)->where('section_id', $section['id_seccion'])->all(), $cursoID);
+                $this->capFunctionSaveLessons($sec->id, collect($lessons)->where('section_id', $section['id_seccion'])->all(), $cursoID);
             }
 
             // Actualizar el campo order_section del curso con los IDs de las secciones
@@ -828,7 +936,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
     }
 
 
-    public function saveLessons($sectionId, $lessons, $templateId)
+    public function capFunctionSaveLessons($sectionId, $lessons, $templateId)
     {
         DB::beginTransaction();
         try {
@@ -852,17 +960,17 @@ class tbApiControllerInstructorCapacitaciones extends Controller
                         'Documento' => (!empty($lesson['file'])
                             // && $this->isValidDocument($lesson['file'])
                         )
-                            ? $this->storeDocumentLesson($lesson, $sectionId)
+                            ? $this->capFunctionStoreDocumentLesson($lesson, $sectionId)
                             : throw new \Exception("Formato de archivo no válido."),
                         default => throw new \Exception("Formato de lección no válido."),
                     };
 
                     if (!empty($lesson['file'])) {
-                        $this->storeResourceFile($lesson['file'], $resource, $sectionId);
+                        $this->capFunctionStoreResourceFile($lesson['file'], $resource, $sectionId);
                     }
                 } else {
                     // Actualizar lección existente
-                    $this->updateExistingLesson($lesson['id_leccion'], $lesson, $sectionId);
+                    $this->capFunctionUpdateExistingLesson($lesson['id_leccion'], $lesson, $sectionId);
                 }
             }
             DB::commit();
@@ -872,7 +980,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         }
     }
 
-    private function storeDocumentLesson($lesson, $sectionId)
+    private function capFunctionStoreDocumentLesson($lesson, $sectionId)
     {
         return Lesson::create([
             'name' => $lesson['name_lesson'],
@@ -881,7 +989,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    private function storeResourceFile($file, $resource, $sectionId = null)
+    private function capFunctionStoreResourceFile($file, $resource, $sectionId = null)
     {
         $uuid = Str::uuid();
         $newFileName = "{$uuid}_{$file->getClientOriginalName()}";
@@ -893,7 +1001,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         $resource->resource()->create(['url' => $storedPath]);
     }
 
-    private function updateExistingLesson($id, $lesson, $sectionId)
+    private function capFunctionUpdateExistingLesson($id, $lesson, $sectionId)
     {
         $leccionPrevia = Lesson::find($id);
 
@@ -915,7 +1023,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
                         ]);
 
                         if (!empty($lesson['file'])) {
-                            $this->storeResourceFile($lesson['file'], $leccionPrevia, $sectionId);
+                            $this->capFunctionStoreResourceFile($lesson['file'], $leccionPrevia, $sectionId);
                         }
                     } catch (\Throwable $th) {
                     }
@@ -949,7 +1057,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
                         ]);
 
                         if (!empty($lesson['file'])) {
-                            $this->storeResourceFile($lesson['file'], $leccionPrevia, $sectionId);
+                            $this->capFunctionStoreResourceFile($lesson['file'], $leccionPrevia, $sectionId);
                         }
                     } catch (\Throwable $th) {
                     }
@@ -961,7 +1069,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         }
     }
 
-    public function tbFunctionDeleteSeccion($id_section)
+    public function capFunctionDeleteSeccion($id_section)
     {
         $section = Section::find($id_section);
 
@@ -973,7 +1081,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionDeleteLesson($id_lesson)
+    public function capFunctionDeleteLesson($id_lesson)
     {
         $lesson = Lesson::find($id_lesson);
 
@@ -985,7 +1093,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionIndexEvaluacion($id_course)
+    public function capFunctionIndexEvaluacion($id_course)
     {
         $evaluations = Evaluation::select('id', 'section_id', 'course_id', 'name', 'description', 'is_active', 'linkedTo', 'details')->where('course_id', $id_course)->get()->toArray();
 
@@ -994,7 +1102,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionCreateEvaluacion($id_course)
+    public function capFunctionCreateEvaluacion($id_course)
     {
         $sections = Section::where('course_id', $id_course)->get();
 
@@ -1003,7 +1111,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionStoreEvaluacion(Request $request, $id_course)
+    public function capFunctionStoreEvaluacion(Request $request, $id_course)
     {
         Evaluation::create([
             'name' => $request['name'],
@@ -1020,7 +1128,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionEditarEvaluacion($id_evaluation)
+    public function capFunctionEditarEvaluacion($id_evaluation)
     {
         $evaluation = Evaluation::find($id_evaluation)->toArray();
 
@@ -1029,7 +1137,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionUpdateEvaluacion(Request $request, $id_evaluation)
+    public function capFunctionUpdateEvaluacion(Request $request, $id_evaluation)
     {
         $evaluation = Evaluation::findOrFail($id_evaluation);
 
@@ -1047,7 +1155,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionDestroyEvaluacion($id_evaluation)
+    public function capFunctionDestroyEvaluacion($id_evaluation)
     {
         $evaluation = Evaluation::findOrFail($id_evaluation);
         $evaluation->delete();
@@ -1058,7 +1166,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionEvaluacionwithQuestions($id_evaluation)
+    public function capFunctionEvaluacionwithQuestions($id_evaluation)
     {
         $evaluation = Evaluation::with('questions.answers')->findOrFail($id_evaluation);
 
@@ -1069,62 +1177,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         return response()->json(['evaluation' => $json_preguntas_curso], 200);
     }
 
-    private function formatEvaluationData($evaluation)
-    {
-        $evaluationData = [
-            'id_evaluation' => $evaluation->id,
-            'name_evaluation' => $evaluation->name,
-            'evaluation_blocked' => false,
-            'questions' => $this->formatQuestions($evaluation)
-        ];
-
-        return $evaluationData;
-    }
-
-    private function formatQuestions($evaluation)
-    {
-        $questionsData = [];
-        foreach ($evaluation->questions->shuffle() as $question) {
-            $questionsData[] = [
-                'id_question' => $question->id,
-                'question' => $question->question,
-                'is_active' => $question->is_active,
-                'answers' => $this->formatAnswers($question->answers),
-            ];
-        }
-        return $questionsData;
-    }
-
-    private function formatQuestion($question)
-    {
-        $questionsData = [];
-
-        $questionsData[] = [
-            'id_question' => $question->id,
-            'question' => $question->question,
-            'is_active' => $question->is_active,
-            'answers' => $this->formatAnswers($question->answers),
-        ];
-        return $questionsData;
-    }
-
-    private function formatAnswers($answers, $selectedAnswerId = null, $isCorrect = false)
-    {
-        $answersData = [];
-        foreach ($answers as $answer) {
-            $answersData[] = [
-                "id_answer" => $answer->id,
-                "answer" => $answer->answer,
-                "is_correct" => $selectedAnswerId === $answer->id
-                    ? (bool) $isCorrect
-                    : (bool) $answer->is_correct,
-                "selected" => $selectedAnswerId === $answer->id,
-            ];
-        }
-        return $answersData;
-    }
-
-    public function tbFunctionStoreQuestion(Request $request, $id_evaluation)
+    public function capFunctionStoreQuestion(Request $request, $id_evaluation)
     {
         $question = Question::create([
             'explanation' => $request['explanation'],
@@ -1148,7 +1201,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionEditarQuestion($id_question)
+    public function capFunctionEditarQuestion($id_question)
     {
         $question = Question::find($id_question);
 
@@ -1159,7 +1212,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionUpdateQuestion(Request $request, $id_question)
+    public function capFunctionUpdateQuestion(Request $request, $id_question)
     {
         $question = Question::find($id_question);
         $question->update([
@@ -1193,7 +1246,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionDeleteQuestion($id_question)
+    public function capFunctionDeleteQuestion($id_question)
     {
         $question = Question::find($id_question);
 
@@ -1205,7 +1258,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionDeleteAnswer($id_answer)
+    public function capFunctionDeleteAnswer($id_answer)
     {
         $answer = Answer::find($id_answer);
 
@@ -1217,7 +1270,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionEditCertificadoCurso($id_course)
+    public function capFunctionEditCertificadoCurso($id_course)
     {
         $course = Course::select('id', 'certificado', 'firma_instructor', 'firma_habilitar')->find($id_course);
 
@@ -1226,7 +1279,7 @@ class tbApiControllerInstructorCapacitaciones extends Controller
         ]);
     }
 
-    public function tbFunctionUpdateCertificadoCurso(Request $request, $id_course)
+    public function capFunctionUpdateCertificadoCurso(Request $request, $id_course)
     {
         $course = Course::find($id_course);
 

@@ -17,7 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class tbApiControllerCapacitaciones extends Controller
+class capApiControllerCapacitaciones extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,17 +41,119 @@ class tbApiControllerCapacitaciones extends Controller
         return $url;
     }
 
-    public function tbFunctionUltimoCurso()
+
+    private function formatCourseData($course)
+    {
+        return [
+            'id_course' => $course->id,
+            'title' => $course->title,
+            'subtitle' => $course->subtitle,
+            'nombre_instructor' => $course->instructor->name,
+        ];
+    }
+
+    private function formatEvaluationData($evaluation, $user)
+    {
+        $totalQuizQuestions = $evaluation->questions->count();
+
+        $userEvaluation = UserEvaluation::firstOrCreate(
+            ['user_id' => $user->id, 'evaluation_id' => $evaluation->id],
+            ['quiz_size' => $totalQuizQuestions, 'completed' => false, 'approved' => false]
+        );
+
+        $nextAttempt = null;
+
+        $lastAttempt = Carbon::parse($userEvaluation->last_attempt);
+        $now = Carbon::now();
+
+        $diferencia = $now->diffInSeconds($lastAttempt->addHours(8), false);
+
+        if ($diferencia < 0) {
+            // Si ha pasado el tiempo, restablecer los intentos
+            $userEvaluation->update([
+                'number_of_attempts' => 3
+            ]);
+        } else {
+            // Formatear el tiempo restante
+            $nextAttempt = Carbon::parse($userEvaluation->last_attempt)->addHours(8)->toDateTimeString();
+        }
+
+        $evaluationData = [
+            'id_evaluation' => $evaluation->id,
+            'name_evaluation' => $evaluation->name,
+            'evaluation_completed' => $userEvaluation->completed,
+            'evaluation_approved' => $userEvaluation->approved,
+            'evaluation_number_attempts' => $userEvaluation->number_of_attempts,
+            'evaluation_last_attempt' => $userEvaluation->last_attempt,
+            'evaluation_next_attempt' => $nextAttempt,
+            'evaluation_blocked' => false,
+            'questions' => $userEvaluation->completed
+                ? $this->formatCompletedQuestions($userEvaluation)
+                : $this->formatUncompletedQuestions($evaluation)
+        ];
+
+        return $evaluationData;
+    }
+
+    private function formatUncompletedQuestions($evaluation)
+    {
+        $questionsData = [];
+        foreach ($evaluation->questions->shuffle() as $question) {
+            $questionsData[] = [
+                'id_question' => $question->id,
+                'question' => $question->question,
+                'is_active' => $question->is_active,
+                'answers' => $this->formatAnswers($question->answers),
+            ];
+        }
+        return $questionsData;
+    }
+
+    private function formatCompletedQuestions($userEvaluation)
+    {
+        $questionsData = [];
+        foreach ($userEvaluation->userAnswers as $answeredQuestion) {
+            $question = $answeredQuestion->question;
+            $questionsData[] = [
+                'id_question' => $question->id,
+                'question' => $question->question,
+                'is_active' => $question->is_active,
+                'answers' => $this->formatAnswers($question->answers, $answeredQuestion->answer_id, $answeredQuestion->is_correct),
+            ];
+        }
+        return $questionsData;
+    }
+
+    private function formatAnswers($answers, $selectedAnswerId = null, $isCorrect = false)
+    {
+        $answersData = [];
+        foreach ($answers as $answer) {
+            $answersData[] = [
+                "id_answer" => $answer->id,
+                "answer" => $answer->answer,
+                "is_correct" => $selectedAnswerId === $answer->id
+                    ? (bool) $isCorrect
+                    : (bool) $answer->is_correct,
+                "selected" => $selectedAnswerId === $answer->id,
+            ];
+        }
+        return $answersData;
+    }
+
+    /**
+     * Get the last course the user has reviewed.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionUltimoCurso()
     {
         $usuario = User::getCurrentUser();
         $cursos_usuario = UsuariosCursos::with('cursos')->where('user_id', $usuario->id)->get();
 
-        // Obtener el último curso y los últimos tres cursos
+        // Obtener el último curso
         $ultimo = $cursos_usuario->sortBy('last_review')->last();
 
         $course_user = CourseUser::with('curso.instructor')->where('user_id', $usuario->id)->where('course_id', $ultimo->cursos->id)->first();
-
-        $curso = $course_user->curso;
 
         $json_lastCourse = [
             'id_course' => $ultimo->cursos->id,
@@ -70,16 +172,23 @@ class tbApiControllerCapacitaciones extends Controller
         ), 200)->header('Content-Type', 'application/json');
     }
 
-    public function tbFunctionCursosInscrito()
+    /**
+     * Get the courses the user is enrolled in.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionCursosInscrito()
     {
         $usuario = User::getCurrentUser();
         $cursos_usuario = UsuariosCursos::with('cursos.instructor')->where('user_id', $usuario->id)->get();
         $course_user = CourseUser::where('user_id', $usuario->id)->get();
 
-        // Obtener el último curso y los últimos tres cursos
+        // Sort courses by last review date
         $cursos_usuario = $cursos_usuario->sortBy('last_review');
 
-        foreach ($cursos_usuario as $keyCursos => $cu) {
+        $json_inscribedCourses = [];
+
+        foreach ($cursos_usuario as $cu) { // Removed unused $keyCursos
             $cou = $course_user->where('course_id', $cu->cursos->id)->first();
             $json_inscribedCourses[] = [
                 'id_course' => $cu->cursos->id,
@@ -99,10 +208,14 @@ class tbApiControllerCapacitaciones extends Controller
         ), 200)->header('Content-Type', 'application/json');
     }
 
-    public function tbFunctionCatalogoCursos()
+    /**
+     * Get the catalog of courses.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionCatalogoCursos()
     {
-        $categories = Category::getAll();
-        $levels = Level::getAll();
+        // Fetch all courses with status 3
         $courses = Course::where('status', 3)
             // ->category($this->category_id)
             // ->level($this->level_id)
@@ -120,15 +233,14 @@ class tbApiControllerCapacitaciones extends Controller
                 'course_certificate' => $course->certificado,
                 'colaboradores_inscritos' => $course->students_count,
                 'nombre_instructor' => $course->instructor->name,
-                // 'course_progress' => $course->advance, //No util, no esta inscrito a estos.
+                // 'course_progress' => $course->advance, // Not useful, not enrolled in these courses.
             ];
 
             $courses_lessons = $course->lessons;
             $lesson_introduction = $courses_lessons->first();
 
-            if (! is_null($lesson_introduction)) {
+            if (!is_null($lesson_introduction)) {
                 if (is_null($lesson_introduction->url)) {
-
                     $json_courses['courses'][$keyCourse]['video_introduction'] = null;
                 } else {
                     $json_courses['courses'][$keyCourse]['video_introduction'] = $lesson_introduction->url;
@@ -154,11 +266,15 @@ class tbApiControllerCapacitaciones extends Controller
         ), 200)->header('Content-Type', 'application/json');
     }
 
-    public function tbFunctionInformacionCurso($curso_id)
+    /**
+     * Get detailed information about a specific course for a student.
+     *
+     * @param int $curso_id
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionInformacionCurso($curso_id)
     {
         $usuario = User::getCurrentUser();
-
-        $evaluacionesLeccion = Evaluation::getAll()->where('course_id', $curso_id);
 
         $course = Course::getAll()->where('id', $curso_id)->first();
 
@@ -183,7 +299,6 @@ class tbApiControllerCapacitaciones extends Controller
 
         if (! is_null($lesson_introduction)) {
             if (is_null($lesson_introduction->url)) {
-
                 $json_informacion_curso['course']['video_introduction'] = null;
             } else {
                 $json_informacion_curso['course']['video_introduction'] = $lesson_introduction->url;
@@ -252,7 +367,6 @@ class tbApiControllerCapacitaciones extends Controller
             foreach ($section->evaluations as $keyEvaluation => $evaluation) {
 
                 $totalLectionSection = $section->lessons->count();
-                $completedLectionSection = $section->lessons;
                 $completedLessonsCount = $section->lessons
                     ->filter(function ($lesson) {
                         return $lesson->completed;
@@ -289,11 +403,15 @@ class tbApiControllerCapacitaciones extends Controller
         ), 200)->header('Content-Type', 'application/json');
     }
 
-    public function tbFunctionCursoEstudiante($curso_id)
+    /**
+     * Get detailed progress information about a specific course for a student.
+     *
+     * @param int $curso_id
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionCursoEstudiante($curso_id)
     {
         $usuario = User::getCurrentUser();
-
-        $evaluacionesLeccion = Evaluation::getAll()->where('course_id', $curso_id);
 
         $course = Course::getAll()->where('id', $curso_id)->first();
 
@@ -394,10 +512,16 @@ class tbApiControllerCapacitaciones extends Controller
                 'cursoEstudiante' => $json_progreso_curso,
             ],
         ), 200)->header('Content-Type', 'application/json');
-        // dd($json_progreso_curso, $course, $evaluacionesLeccion);
     }
 
-    public function tbFunctionCursoEvaluacion($curso_id, $evaluation_id)
+    /**
+     * Get detailed information about a specific course evaluation for a student.
+     *
+     * @param int $curso_id
+     * @param int $evaluation_id
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionCursoEvaluacion($curso_id, $evaluation_id)
     {
         $user = User::getCurrentUser();
         $course = Course::with('instructor')->findOrFail($curso_id);
@@ -411,107 +535,15 @@ class tbApiControllerCapacitaciones extends Controller
         return response()->json(['cursoEvaluacion' => $json_preguntas_curso], 200);
     }
 
-    private function formatCourseData($course)
+    /**
+     * Save the answers for a specific course evaluation.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function capFunctionRespuestasCursoEvaluacion(Request $request)
     {
-        return [
-            'id_course' => $course->id,
-            'title' => $course->title,
-            'subtitle' => $course->subtitle,
-            'nombre_instructor' => $course->instructor->name,
-        ];
-    }
-
-    private function formatEvaluationData($evaluation, $user)
-    {
-        $totalQuizQuestions = $evaluation->questions->count();
-
-        $userEvaluation = UserEvaluation::firstOrCreate(
-            ['user_id' => $user->id, 'evaluation_id' => $evaluation->id],
-            ['quiz_size' => $totalQuizQuestions, 'completed' => false, 'approved' => false]
-        );
-
-        $nextAttempt = null;
-
-        $lastAttempt = Carbon::parse($userEvaluation->last_attempt);
-        $now = Carbon::now();
-
-        $diferencia = $now->diffInSeconds($lastAttempt->addHours(8), false);
-
-        if ($diferencia < 0) {
-            // Si ha pasado el tiempo, restablecer los intentos
-            $userEvaluation->update([
-                'number_of_attempts' => 3
-            ]);
-        } else {
-            // Formatear el tiempo restante
-            $nextAttempt = Carbon::parse($userEvaluation->last_attempt)->addHours(8)->toDateTimeString();
-        }
-
-        $evaluationData = [
-            'id_evaluation' => $evaluation->id,
-            'name_evaluation' => $evaluation->name,
-            'evaluation_completed' => $userEvaluation->completed,
-            'evaluation_approved' => $userEvaluation->approved,
-            'evaluation_number_attempts' => $userEvaluation->number_of_attempts,
-            'evaluation_last_attempt' => $userEvaluation->last_attempt,
-            'evaluation_next_attempt' => $nextAttempt,
-            'evaluation_blocked' => false,
-            'questions' => $userEvaluation->completed
-                ? $this->formatCompletedQuestions($userEvaluation)
-                : $this->formatUncompletedQuestions($evaluation)
-        ];
-
-        return $evaluationData;
-    }
-
-    private function formatUncompletedQuestions($evaluation)
-    {
-        $questionsData = [];
-        foreach ($evaluation->questions->shuffle() as $question) {
-            $questionsData[] = [
-                'id_question' => $question->id,
-                'question' => $question->question,
-                'is_active' => $question->is_active,
-                'answers' => $this->formatAnswers($question->answers),
-            ];
-        }
-        return $questionsData;
-    }
-
-    private function formatCompletedQuestions($userEvaluation)
-    {
-        $questionsData = [];
-        foreach ($userEvaluation->userAnswers as $answeredQuestion) {
-            $question = $answeredQuestion->question;
-            $questionsData[] = [
-                'id_question' => $question->id,
-                'question' => $question->question,
-                'is_active' => $question->is_active,
-                'answers' => $this->formatAnswers($question->answers, $answeredQuestion->answer_id, $answeredQuestion->is_correct),
-            ];
-        }
-        return $questionsData;
-    }
-
-    private function formatAnswers($answers, $selectedAnswerId = null, $isCorrect = false)
-    {
-        $answersData = [];
-        foreach ($answers as $answer) {
-            $answersData[] = [
-                "id_answer" => $answer->id,
-                "answer" => $answer->answer,
-                "is_correct" => $selectedAnswerId === $answer->id
-                    ? (bool) $isCorrect
-                    : (bool) $answer->is_correct,
-                "selected" => $selectedAnswerId === $answer->id,
-            ];
-        }
-        return $answersData;
-    }
-
-    public function tbFunctionRespuestasCursoEvaluacion(Request $request)
-    {
-        // Define las reglas de validación
+        // Define validation rules
         $validator = Validator::make($request->all(), [
             'id_course' => ['required', 'integer'],
             'id_evaluation' => ['required', 'integer'],
@@ -523,38 +555,38 @@ class tbApiControllerCapacitaciones extends Controller
             'integer' => 'El campo :attribute debe ser un número.',
         ]);
 
-        // Si hay errores de validación, retornamos un JSON con el error
+        // If validation fails, return a JSON response with the errors
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Errores de validación',
                 'errors' => $validator->errors(),
-            ], 422); // Código HTTP 422 Unprocessable Entity
+            ], 422); // HTTP 422 Unprocessable Entity
         }
 
-        // Obtener al usuario actual
+        // Get the current user
         $user = User::getCurrentUser();
 
-        // Obtener el registro de la evaluacion
+        // Get the user evaluation record
         $userEvaluation = UserEvaluation::where('user_id', $user->id)
             ->where('evaluation_id', $request->id_evaluation)
             ->first();
 
-        // Inicializar la variable
+        // Initialize the variable
         $correctQuestions = 0;
 
-        // Preparar un array para la inserción masiva
+        // Prepare an array for batch insertion
         $data = [];
         foreach ($request->answers as $answer) {
-            // Comprobar si la respuesta es correcta
+            // Check if the answer is correct
             $correctAnswer = Answer::where('id', $answer["id_answer"])
                 ->where('question_id', $answer["id_question"])
                 ->first();
 
-            // Obtener si es correcta o incorrecta
+            // Determine if the choice is correct
             $isChoiceCorrect = $correctAnswer && $correctAnswer->is_correct === "1";
 
-            // Sumarla solo si es correcta
+            // Increment the count only if the answer is correct
             if ($isChoiceCorrect) {
                 $correctQuestions++;
             }
@@ -571,16 +603,16 @@ class tbApiControllerCapacitaciones extends Controller
             ];
         }
 
-        // Obtener el numero de preguntas contestadas en el cuestionario
+        // Get the number of questions answered in the quiz
         $totalQuestions = count($request->answers);
 
-        // Obtener su calificacion de la evaluación
+        // Calculate the evaluation score
         $percentage = ($correctQuestions * 100) / $totalQuestions;
 
         $noa = $userEvaluation->number_of_attempts - 1;
         $now = Carbon::now();
 
-        // Establecerla como completada y poner su porcentaje
+        // Mark the evaluation as completed and set the score
         $userEvaluation->update([
             'score' => $percentage,
             'completed' => true,
@@ -588,77 +620,12 @@ class tbApiControllerCapacitaciones extends Controller
             'last_attempt' => $now
         ]);
 
-        // Insertar todas las respuestas en una sola operación (batch)
+        // Insert all answers in a single batch operation
         UserAnswer::insert($data);
 
         return response()->json([
             'success' => true,
             'message' => 'Cuestionario Completado. Respuestas guardadas exitosamente',
         ]);
-    }
-
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }
