@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,9 +14,10 @@ class Goal extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
 
-    protected $guarded = ['id'];
-
+    protected $connection = 'capacitaciones_db';
     protected $table = 'goals';
+
+    protected $guarded = ['id'];
 
     protected $fillable = [
         'id',

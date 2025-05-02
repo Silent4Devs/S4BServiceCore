@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace Modules\CapacitacionesCore\App\Models;
 
 use App\Traits\ClearsResponseCache;
 use Carbon\Carbon;
@@ -40,6 +40,7 @@ class Grupo extends Model implements Auditable
     use ClearsResponseCache, \OwenIt\Auditing\Auditable;
     use HasFactory, SoftDeletes;
 
+    protected $connection = 'capacitaciones_db';
     protected $table = 'grupos';
 
     protected $dates = [

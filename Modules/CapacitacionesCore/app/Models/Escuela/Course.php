@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
 use App\Models\Organizacion;
 use App\Traits\ClearsResponseCache;
@@ -16,9 +16,10 @@ class Course extends Model implements Auditable
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
 
-    protected $guarded = ['id', 'status'];
-
+    protected $connection = 'capacitaciones_db';
     protected $table = 'courses';
+
+    protected $guarded = ['id', 'status'];
 
     protected $withCount = ['students', 'reviews'];
 
@@ -100,27 +101,27 @@ class Course extends Model implements Auditable
 
     public function reviews()
     {
-        return $this->hasMany('App\Models\Escuela\Review');
+        return $this->hasMany('Modules\CapacitacionesCore\App\Models\Escuela\Review');
     }
 
     public function requirements()
     {
-        return $this->hasMany('App\Models\Escuela\Requirement');
+        return $this->hasMany('Modules\CapacitacionesCore\App\Models\Escuela\Requirement');
     }
 
     public function goals()
     {
-        return $this->hasMany('App\Models\Escuela\Goal');
+        return $this->hasMany('Modules\CapacitacionesCore\App\Models\Escuela\Goal');
     }
 
     public function audiences()
     {
-        return $this->hasMany('App\Models\Escuela\Audience');
+        return $this->hasMany('Modules\CapacitacionesCore\App\Models\Escuela\Audience');
     }
 
     public function sections()
     {
-        return $this->hasMany('App\Models\Escuela\Section')->orderBy('created_at', 'asc');
+        return $this->hasMany('Modules\CapacitacionesCore\App\Models\Escuela\Section')->orderBy('created_at', 'asc');
     }
 
     // Relacion uno a muchos inversa
@@ -141,22 +142,22 @@ class Course extends Model implements Auditable
 
     public function level()
     {
-        return $this->belongsTo('App\Models\Escuela\Level');
+        return $this->belongsTo('Modules\CapacitacionesCore\App\Models\Escuela\Level');
     }
 
     public function category()
     {
-        return $this->belongsTo('App\Models\Escuela\Category');
+        return $this->belongsTo('Modules\CapacitacionesCore\App\Models\Escuela\Category');
     }
 
     public function price()
     {
-        return $this->belongsTo('App\Models\Escuela\Level');
+        return $this->belongsTo('Modules\CapacitacionesCore\App\Models\Escuela\Level');
     }
 
     public function usuarioscursos()
     {
-        return $this->hasMany('App\Models\Escuela\UsuariosCursos');
+        return $this->hasMany('Modules\CapacitacionesCore\App\Models\Escuela\UsuariosCursos');
     }
 
     // Relacion muchos a muchos
@@ -169,14 +170,14 @@ class Course extends Model implements Auditable
 
     public function image()
     {
-        return $this->morphOne('App\Models\Escuela\Image', 'imageable');
+        return $this->morphOne('Modules\CapacitacionesCore\App\Models\Escuela\Image', 'imageable');
     }
 
     // Relacion hasManyThrough
     // Relación entre course y lessons
     public function lessons()
     {
-        return $this->hasManyThrough('App\Models\Escuela\Lesson', 'App\Models\Escuela\Section');
+        return $this->hasManyThrough('Modules\CapacitacionesCore\App\Models\Escuela\Lesson', 'Modules\CapacitacionesCore\App\Models\Escuela\Section');
     }
 
     public function getLastFinishedLessonAttribute()

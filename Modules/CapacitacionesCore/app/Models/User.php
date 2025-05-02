@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace Modules\CapacitacionesCore\App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +11,9 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    protected $connection = 'capacitaciones_db';
+    protected $table = 'users';
 
     /**
      * The attributes that are mass assignable.

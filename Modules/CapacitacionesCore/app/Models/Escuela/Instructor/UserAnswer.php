@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Models\Escuela\Instructor;
+namespace Modules\CapacitacionesCore\App\Models\Escuela\Instructor;
 
-use App\Models\Escuela\Evaluation;
-use App\Models\Escuela\UserEvaluation;
+use Modules\CapacitacionesCore\App\Models\Escuela\Evaluation;
+use Modules\CapacitacionesCore\App\Models\Escuela\UserEvaluation;
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +16,7 @@ class UserAnswer extends Model implements Auditable
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
 
+    protected $connection = 'capacitaciones_db';
     protected $table = 'user_answers';
 
     protected $fillable = [

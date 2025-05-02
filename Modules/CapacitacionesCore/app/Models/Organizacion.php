@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace Modules\CapacitacionesCore\App\Models;
 
 use App\Traits\ClearsResponseCache;
 use Carbon\Carbon;
@@ -41,6 +41,7 @@ class Organizacion extends Model implements Auditable
     use ClearsResponseCache, \OwenIt\Auditing\Auditable;
     use SoftDeletes;
 
+    protected $connection = 'capacitaciones_db';
     protected $table = 'organizacions';
 
     protected $appends = ['logotipo', 'fecha_min_timesheet'];

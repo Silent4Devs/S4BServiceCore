@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
-use App\Models\Escuela\Instructor\Question;
+use Modules\CapacitacionesCore\App\Models\Escuela\Instructor\Question;
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +16,7 @@ class Evaluation extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
 
+    protected $connection = 'capacitaciones_db';
     protected $table = 'evaluations';
 
     protected $guarded = ['id'];
@@ -32,7 +33,7 @@ class Evaluation extends Model implements Auditable
 
     public function users()
     {
-        return $this->hasMany('App\Models\Escuela\UserEvaluation');
+        return $this->hasMany('Modules\CapacitacionesCore\App\Models\Escuela\UserEvaluation');
     }
 
     public function getCompletedAttribute()

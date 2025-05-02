@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +13,9 @@ class Lesson extends Model implements Auditable
     use ClearsResponseCache, HasFactory;
     use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
+
+    protected $connection = 'capacitaciones_db';
+    protected $table = 'lessons';
 
     protected $guarded = ['id'];
 
@@ -41,7 +44,7 @@ class Lesson extends Model implements Auditable
     {
 
         if ($this->resource) {
-            $ruta = storage_path('app/'.$this->resource->url);
+            $ruta = storage_path('app/' . $this->resource->url);
 
             // Obtener la extensión del archivo
             $informacionArchivo = pathinfo($ruta);
@@ -55,18 +58,18 @@ class Lesson extends Model implements Auditable
 
     public function description()
     {
-        return $this->hasOne('App\Models\Escuela\Description');
+        return $this->hasOne('Modules\CapacitacionesCore\App\Models\Escuela\Description');
     }
 
     // Relacion uno a muchos inversa
     public function section()
     {
-        return $this->belongsTo('App\Models\Escuela\Section');
+        return $this->belongsTo('Modules\CapacitacionesCore\App\Models\Escuela\Section');
     }
 
     public function platform()
     {
-        return $this->belongsTo('App\Models\Escuela\Platform');
+        return $this->belongsTo('Modules\CapacitacionesCore\App\Models\Escuela\Platform');
     }
 
     // Relacion muchos a muchos
@@ -79,18 +82,18 @@ class Lesson extends Model implements Auditable
 
     public function resource()
     {
-        return $this->morphOne('App\Models\Escuela\Resource', 'resourceable');
+        return $this->morphOne('Modules\CapacitacionesCore\App\Models\Escuela\Resource', 'resourceable');
     }
 
     // Relacion uno a muchos polimorfica
 
     public function comments()
     {
-        return $this->morphMany('App\Models\Escuela\Comment', 'commentable');
+        return $this->morphMany('Modules\CapacitacionesCore\App\Models\Escuela\Comment', 'commentable');
     }
 
     public function reactions()
     {
-        return $this->morphMany('App\Models\Escuela\Reaction', 'reactionable');
+        return $this->morphMany('Modules\CapacitacionesCore\App\Models\Escuela\Reaction', 'reactionable');
     }
 }

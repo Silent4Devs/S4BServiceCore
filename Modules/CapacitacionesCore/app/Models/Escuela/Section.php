@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,19 +14,22 @@ class Section extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
 
+    protected $connection = 'capacitaciones_db';
+    protected $table = 'sections';
+
     protected $guarded = ['id'];
 
     // Relacion uno a muchos
 
     public function lessons()
     {
-        return $this->hasMany('App\Models\Escuela\Lesson')->orderBy('created_at', 'asc');
+        return $this->hasMany('Modules\CapacitacionesCore\App\Models\Escuela\Lesson')->orderBy('created_at', 'asc');
     }
 
     // Relacion uno a muchos inversa
     public function course()
     {
-        return $this->belongsTo('App\Models\Escuela\Course');
+        return $this->belongsTo('Modules\CapacitacionesCore\App\Models\Escuela\Course');
     }
 
     public function evaluations()

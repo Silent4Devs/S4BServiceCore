@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models\Escuela\Instructor;
+namespace Modules\CapacitacionesCore\App\Models\Escuela\Instructor;
 
+use Modules\CapacitacionesCore\App\Models\Escuela\Evaluation;
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ class Question extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
 
+    protected $connection = 'capacitaciones_db';
     protected $table = 'questions';
 
     protected $fillable = [

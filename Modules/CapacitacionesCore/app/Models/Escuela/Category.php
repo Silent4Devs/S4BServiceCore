@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +14,9 @@ class Category extends Model implements Auditable
     use ClearsResponseCache, HasFactory;
     use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
+
+    protected $connection = 'capacitaciones_db';
+    protected $table = 'categories';
 
     protected $guarded = ['id'];
 

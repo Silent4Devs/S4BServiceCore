@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
 use App\Models\User;
 use App\Traits\ClearsResponseCache;
@@ -13,6 +13,7 @@ class UsuariosCursos extends Model implements Auditable
     use ClearsResponseCache, HasFactory;
     use \OwenIt\Auditing\Auditable;
 
+    protected $connection = 'capacitaciones_db';
     protected $table = 'course_user';
 
     protected $fillable = [

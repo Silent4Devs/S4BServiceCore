@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +14,9 @@ class Review extends Model implements Auditable
     use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
 
+    protected $connection = 'capacitaciones_db';
+    protected $table = 'reviews';
+
     protected $guarded = ['id'];
 
     // Relacion uno a muchos inversa
@@ -25,6 +28,6 @@ class Review extends Model implements Auditable
 
     public function course()
     {
-        return $this->belongsTo('App\Models\Escuela\Course');
+        return $this->belongsTo('Modules\CapacitacionesCore\App\Models\Escuela\Course');
     }
 }

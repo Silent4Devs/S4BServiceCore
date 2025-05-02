@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
-use App\Models\Escuela\Instructor\UserAnswer;
+use Modules\CapacitacionesCore\App\Models\Escuela\Instructor\UserAnswer;
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +13,7 @@ class UserEvaluation extends Model implements Auditable
     use ClearsResponseCache, HasFactory;
     use \OwenIt\Auditing\Auditable;
 
+    protected $connection = 'capacitaciones_db';
     protected $table = 'user_evaluations';
 
     protected $casts = [

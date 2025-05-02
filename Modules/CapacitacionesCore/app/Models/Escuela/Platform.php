@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Escuela;
+namespace Modules\CapacitacionesCore\App\Models\Escuela;
 
 use App\Traits\ClearsResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +13,9 @@ class Platform extends Model implements Auditable
     use ClearsResponseCache, HasFactory;
     use \OwenIt\Auditing\Auditable;
     use SoftDeletes;
+
+    protected $connection = 'capacitaciones_db';
+    protected $table = 'platforms';
 
     protected $guarded = ['id'];
 
