@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Escuela\Course;
+use Modules\CapacitacionesCore\App\Models\Escuela\Course;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('courses', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('courses', function (Blueprint $table) {
             $table->id();
 
             $table->string('title');

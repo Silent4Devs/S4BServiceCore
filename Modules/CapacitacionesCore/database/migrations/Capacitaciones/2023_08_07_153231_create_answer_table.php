@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('answers', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('answers', function (Blueprint $table) {
             $table->id();
             $table->string('answer');
             $table->enum('is_correct', ['0', '1'])->default('0');

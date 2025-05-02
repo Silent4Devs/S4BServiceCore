@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('sections', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('sections', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->unsignedBigInteger('course_id');

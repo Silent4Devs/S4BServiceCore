@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('images', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('images', function (Blueprint $table) {
             $table->id();
 
             $table->string('url');

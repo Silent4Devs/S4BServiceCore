@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('evaluations', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('evaluations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('section_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('course_id')->nullable()->constrained()->onDelete('cascade');

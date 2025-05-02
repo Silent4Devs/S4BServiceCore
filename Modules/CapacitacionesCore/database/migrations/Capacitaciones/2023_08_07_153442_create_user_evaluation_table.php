@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('user_evaluations', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('user_evaluations', function (Blueprint $table) {
             $table->id();
             $table->boolean('completed')->default(false);
             $table->float('score')->default(0.0);

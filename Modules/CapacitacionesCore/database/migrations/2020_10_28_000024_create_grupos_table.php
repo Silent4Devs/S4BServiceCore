@@ -8,7 +8,7 @@ class CreateGruposTable extends Migration
 {
     public function up()
     {
-        Schema::create('grupos', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('grupos', function (Blueprint $table) {
             $table->increments('id');
             $table->string('grupo')->nullable();
             $table->longText('descripcion')->after('grupo')->nullable();

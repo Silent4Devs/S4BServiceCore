@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('course_user', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('course_user', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->unsignedBigInteger('course_id');

@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('reviews', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('reviews', function (Blueprint $table) {
             $table->id();
 
             $table->text('comment');

@@ -8,7 +8,7 @@ class CreateOrganizacionsTable extends Migration
 {
     public function up()
     {
-        Schema::create('organizacions', function (Blueprint $table) {
+        Schema::connection('capacitaciones_db')->create('organizacions', function (Blueprint $table) {
             $table->increments('id');
             $table->string('empresa');
             $table->longText('direccion');
