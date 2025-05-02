@@ -29,69 +29,69 @@ Route::get('/test', function () {
 });
 
 Route::prefix('capacitaciones')->group(function () {
-    Route::get('/tblastcourse', [capApiControllerCapacitaciones::class, 'tbFunctionUltimoCurso']);
-    Route::get('/tbinscribedcourses', [capApiControllerCapacitaciones::class, 'tbFunctionCursosInscrito']);
-    Route::get('/tbcoursecatalogue', [capApiControllerCapacitaciones::class, 'tbFunctionCatalogoCursos']);
-    Route::get('/tbcourseinfo/{id}', [capApiControllerCapacitaciones::class, 'tbFunctionInformacionCurso']);
-    Route::get('tbstudentcourse/{course}/evaluation/{evaluation}', [capApiControllerCapacitaciones::class, 'tbFunctionCursoEvaluacion']);
-    Route::get('/tbstudentcourse/{id}', [capApiControllerCapacitaciones::class, 'tbFunctionCursoEstudiante']);
-    Route::post('/tbstudentevaluation/answers', [capApiControllerCapacitaciones::class, 'tbFunctionRespuestasCursoEvaluacion']);
+    Route::get('/capLastcourse', [capApiControllerCapacitaciones::class, 'capFunctionUltimoCurso']);
+    Route::get('/capInscribedcourses', [capApiControllerCapacitaciones::class, 'capFunctionCursosInscrito']);
+    Route::get('/capCoursecatalogue', [capApiControllerCapacitaciones::class, 'capFunctionCatalogoCursos']);
+    Route::get('/capCourseinfo/{id}', [capApiControllerCapacitaciones::class, 'capFunctionInformacionCurso']);
+    Route::get('capStudentcourse/{course}/evaluation/{evaluation}', [capApiControllerCapacitaciones::class, 'capFunctionCursoEvaluacion']);
+    Route::get('/capStudentcourse/{id}', [capApiControllerCapacitaciones::class, 'capFunctionCursoEstudiante']);
+    Route::post('/capStudentevaluation/answers', [capApiControllerCapacitaciones::class, 'capFunctionRespuestasCursoEvaluacion']);
 });
 
 Route::prefix('instructorCapacitaciones')->group(function () {
-    Route::get('/tbIndexCourse', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionIndexCurso']);
-    Route::get('/tbCreateCourse', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionCreateCurso']);
-    Route::post('/tbStoreCourse', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionStoreCurso']);
-    Route::get('/tbEditCourse/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionEditCurso']);
-    Route::post('/tbUpdateCourse/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionUpdateCurso']);
-    Route::get('/tbShowCourse/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionShowCurso']);
-    Route::delete('/tbDeleteCourse/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDeleteCurso']);
+    Route::get('/capIndexCourse', [capApiControllerInstructorCapacitaciones::class, 'capFunctionIndexCurso']);
+    Route::get('/capCreateCourse', [capApiControllerInstructorCapacitaciones::class, 'capFunctionCreateCurso']);
+    Route::post('/capStoreCourse', [capApiControllerInstructorCapacitaciones::class, 'capFunctionStoreCurso']);
+    Route::get('/capEditCourse/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionEditCurso']);
+    Route::post('/capUpdateCourse/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionUpdateCurso']);
+    Route::get('/capShowCourse/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionShowCurso']);
+    Route::delete('/capDeleteCourse/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDeleteCurso']);
 
-    Route::get('/tbIndexGoals/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionIndexGoals']);
-    Route::post('/tbStoreGoals/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionStoreGoals']);
-    Route::get('/tbEditGoals/{id_goal}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionEditGoals']);
-    Route::post('/tbUpdateGoals/{id_goal}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionUpdateGoals']);
-    Route::delete('/tbDeleteGoals/{id_goal}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDeleteGoals']);
+    Route::get('/capIndexGoals/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionIndexGoals']);
+    Route::post('/capStoreGoals/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionStoreGoals']);
+    Route::get('/capEditGoals/{id_goal}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionEditGoals']);
+    Route::post('/capUpdateGoals/{id_goal}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionUpdateGoals']);
+    Route::delete('/capDeleteGoals/{id_goal}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDeleteGoals']);
 
-    Route::get('/tbIndexRequirements/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionIndexRequirements']);
-    Route::post('/tbStoreRequirements/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionStoreRequirements']);
-    Route::get('/tbEditRequirements/{id_requirement}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionEditRequirements']);
-    Route::post('/tbUpdateRequirements/{id_requirement}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionUpdateRequirements']);
-    Route::delete('/tbDeleteRequirements/{id_requirement}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDeleteRequirements']);
+    Route::get('/capIndexRequirements/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionIndexRequirements']);
+    Route::post('/capStoreRequirements/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionStoreRequirements']);
+    Route::get('/capEditRequirements/{id_requirement}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionEditRequirements']);
+    Route::post('/capUpdateRequirements/{id_requirement}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionUpdateRequirements']);
+    Route::delete('/capDeleteRequirements/{id_requirement}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDeleteRequirements']);
 
-    Route::get('/tbIndexAudience/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionIndexAudience']);
-    Route::post('/tbStoreAudience/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionStoreAudience']);
-    Route::get('/tbEditAudience/{id_audience}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionEditAudience']);
-    Route::post('/tbUpdateAudience/{id_audience}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionUpdateAudience']);
-    Route::delete('/tbDeleteAudience/{id_audience}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDeleteAudience']);
+    Route::get('/capIndexAudience/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionIndexAudience']);
+    Route::post('/capStoreAudience/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionStoreAudience']);
+    Route::get('/capEditAudience/{id_audience}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionEditAudience']);
+    Route::post('/capUpdateAudience/{id_audience}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionUpdateAudience']);
+    Route::delete('/capDeleteAudience/{id_audience}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDeleteAudience']);
 
-    Route::get('/tbIndexEstudiantes/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionIndexEstudiantes']);
-    Route::post('/tbStoreEstudiantes/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionStoreEstudiantes']);
-    Route::delete('/tbDeleteEstudiantes', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDeleteEstudiantes']);
-    Route::delete('/tbDeleteMultipleEstudiantes', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionMultipleDeleteEstudiantes']);
-    Route::delete('/tbDeleteAllEstudiantes/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionAllDeleteEstudiantes']);
+    Route::get('/capIndexEstudiantes/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionIndexEstudiantes']);
+    Route::post('/capStoreEstudiantes/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionStoreEstudiantes']);
+    Route::delete('/capDeleteEstudiantes', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDeleteEstudiantes']);
+    Route::delete('/capDeleteMultipleEstudiantes', [capApiControllerInstructorCapacitaciones::class, 'capFunctionMultipleDeleteEstudiantes']);
+    Route::delete('/capDeleteAllEstudiantes/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionAllDeleteEstudiantes']);
 
-    Route::get('/tbIndexSections/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionIndexSeccionesCurso']);
-    Route::post('/tbStoreSections/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionStoreSeccionesCurso']);
-    Route::delete('/tbDeleteSection/{id_section}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDeleteSeccion']);
-    Route::delete('/tbDeleteLesson/{id_lesson}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDeleteLesson']);
+    Route::get('/capIndexSections/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionIndexSeccionesCurso']);
+    Route::post('/capStoreSections/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionStoreSeccionesCurso']);
+    Route::delete('/capDeleteSection/{id_section}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDeleteSeccion']);
+    Route::delete('/capDeleteLesson/{id_lesson}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDeleteLesson']);
 
-    Route::get('/tbIndexEvaluations/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionIndexEvaluacion']);
+    Route::get('/capIndexEvaluations/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionIndexEvaluacion']);
 
-    Route::get('/tbIndexEvaluation/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionIndexEvaluacion']);
-    Route::get('/tbCreateEvaluation/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionCreateEvaluacion']);
-    Route::post('/tbStoreEvaluation/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionStoreEvaluacion']);
-    Route::get('/tbEditEvaluation/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionEditarEvaluacion']);
-    Route::post('/tbUpdateEvaluation/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionUpdateEvaluacion']);
-    Route::delete('/tbDeleteEvaluation/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDestroyEvaluacion']);
+    Route::get('/capIndexEvaluation/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionIndexEvaluacion']);
+    Route::get('/capCreateEvaluation/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionCreateEvaluacion']);
+    Route::post('/capStoreEvaluation/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionStoreEvaluacion']);
+    Route::get('/capEditEvaluation/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionEditarEvaluacion']);
+    Route::post('/capUpdateEvaluation/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionUpdateEvaluacion']);
+    Route::delete('/capDeleteEvaluation/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDestroyEvaluacion']);
 
-    Route::get('/tbEvaluationQuestions/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionEvaluacionwithQuestions']);
-    Route::post('/tbStoreQuestion/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionStoreQuestion']);
-    Route::get('/tbEditQuestion/{id_question}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionEditarQuestion']);
-    Route::get('/tbUpdateQuestion/{id_question}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionUpdateQuestion']);
-    Route::post('/tbDeleteQuestion/{id_question}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDeleteQuestion']);
-    Route::delete('/tbDeleteAnswer/{id_answer}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionDeleteAnswer']);
+    Route::get('/capEvaluationQuestions/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionEvaluacionwithQuestions']);
+    Route::post('/capStoreQuestion/{id_evaluation}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionStoreQuestion']);
+    Route::get('/capEditQuestion/{id_question}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionEditarQuestion']);
+    Route::get('/capUpdateQuestion/{id_question}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionUpdateQuestion']);
+    Route::post('/capDeleteQuestion/{id_question}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDeleteQuestion']);
+    Route::delete('/capDeleteAnswer/{id_answer}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionDeleteAnswer']);
 
-    Route::get('/tbEditCertificadoCurso/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionEditCertificadoCurso']);
-    Route::post('/tbUpdateCertificadoCurso/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'tbFunctionUpdateCertificadoCurso']);
+    Route::get('/capEditCertificadoCurso/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionEditCertificadoCurso']);
+    Route::post('/capUpdateCertificadoCurso/{id_course}', [capApiControllerInstructorCapacitaciones::class, 'capFunctionUpdateCertificadoCurso']);
 });

@@ -3,15 +3,15 @@
 namespace Modules\CapacitacionesCore\app\Http\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Escuela\Category;
-use App\Models\Escuela\Course;
-use App\Models\Escuela\CourseUser;
-use App\Models\Escuela\Evaluation;
-use App\Models\Escuela\Instructor\Answer;
-use App\Models\Escuela\Instructor\UserAnswer;
-use App\Models\Escuela\Level;
-use App\Models\Escuela\UserEvaluation;
-use App\Models\Escuela\UsuariosCursos;
+use Modules\CapacitacionesCore\App\Models\Escuela\Category;
+use Modules\CapacitacionesCore\App\Models\Escuela\Course;
+use Modules\CapacitacionesCore\App\Models\Escuela\CourseUser;
+use Modules\CapacitacionesCore\App\Models\Escuela\Evaluation;
+use Modules\CapacitacionesCore\App\Models\Escuela\Instructor\Answer;
+use Modules\CapacitacionesCore\App\Models\Escuela\Instructor\UserAnswer;
+use Modules\CapacitacionesCore\App\Models\Escuela\Level;
+use Modules\CapacitacionesCore\App\Models\Escuela\UserEvaluation;
+use Modules\CapacitacionesCore\App\Models\Escuela\UsuariosCursos;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
