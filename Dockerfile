@@ -1,4 +1,4 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.2-fpm-alpine3.21
 
 # Add docker-php-extension-installer script
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
@@ -78,7 +78,6 @@ RUN chown -R www-data:www-data /var/www \
 RUN composer require laravel/octane
 RUN composer install
 
-# CMD ["php", "artisan", "serve"]
 # Healthcheck
-# HEALTHCHECK --interval=15m --timeout=3s \
-#     CMD curl --fail http://localhost/ || exit 1
+HEALTHCHECK --interval=15m --timeout=3s \
+    CMD curl --fail http://localhost/ || exit 1
