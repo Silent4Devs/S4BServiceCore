@@ -1,0 +1,173 @@
+# services:
+#     backend:
+#         build: .
+#         ports:
+#             - "8000:8000"
+#         volumes:
+#             - .:/var/www/html
+#             - ./infra/php/php.ini:/usr/local/etc/php/php.ini
+#             - ./infra/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+#         container_name: backend
+#         restart: unless-stopped
+#         networks:
+#             - corenetwork
+
+
+# networks:
+#   corenetwork:
+#     driver: bridge
+
+services:
+  nginx-4you:
+    image: nginx:stable-alpine
+    container_name: nginx-4you
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 80:80/tcp
+      - 443:443/tcp
+    volumes:
+      - ./public:/var/www/html/public:ro
+      - .:/var/www/html
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./infra/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - php
+      - postgres-4you
+      - redis-4you
+    env_file:
+      - .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "30m"
+        max-file: "1"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - 4younetwork
+
+  postgres-4you:
+    image: postgres:16-alpine
+    container_name: postgres-4you
+    restart: unless-stopped
+    tty: true
+    volumes:
+      # - ./infra/postgres/data:/var/lib/postgresql/data #localpath
+      - 4you-database:/var/lib/postgresql/data
+      - ./infra/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+    environment:
+      POSTGRES_DB: 4you
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123"
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    networks:
+      - 4younetwork
+    mem_limit: 8g
+
+  php:
+    #uncomment this if you will use only docker compose
+    build:
+      context: "./infra/php/"
+      dockerfile: Dockerfile
+
+    #     # target: php-production  # Specify the target build stage if applicable
+    #     # args:
+    #     # - BUILD_ENV=production  # Pass any necessary build arguments
+    # #container_name: php-tabantaj
+    #uncomment this if you will use only docker compose
+    #image: johnvo95/tabantaj_php-tabantaj:latest
+    container_name: php-4you
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 9000:9000
+    volumes:
+      - .:/var/www/html
+      - ./infra/php/php.ini:/usr/local/etc/php/php.ini
+      - ./infra/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+    networks:
+      - 4younetwork
+    mem_limit: 10g
+
+#   queue-worker:
+#     build:
+#       context: "./infra/php/"
+#       dockerfile: Dockerfile
+#     volumes:
+#       - .:/var/www/html
+#       - ./infra/php/php.ini:/usr/local/etc/php/php.ini
+#       - ./infra/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
+#     command: php artisan queue:work --tries=6 --memory=6144 --max-jobs=1000 --max-time=3600
+#     depends_on:
+#       - php
+#     container_name: queue-worker-4you
+#     restart: unless-stopped
+#     tty: true
+#     environment:
+#       CONTAINER_ROLE: queue
+#     networks:
+#       - 4younetwork
+#     mem_limit: 6g
+
+  redis-4you:
+    image: redis:alpine
+    container_name: redis-4you
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - ./infra/redis/redis.conf:/usr/local/etc/redis/redis.conf # Mount the Redis configuration file
+    networks:
+      - 4younetwork
+    # networks:
+    #   - 4younetwork
+    mem_limit: 4g
+
+  rdadmin-4you:
+    image: erikdubbelboer/phpredisadmin:latest
+    container_name: rdadmin-4you
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 6360:80
+    env_file:
+      - .env
+    networks:
+      - 4younetwork
+    # networks:
+    #   - 4younetwork
+    mem_limit: 1g
+
+  rabbitmq-4you:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq-4you
+    env_file:
+      - .env
+    ports:
+      - 5672:5672
+      - 15672:15672
+    tty: true
+    networks:
+      - 4younetwork
+    volumes:
+      - ./infra/rabbit/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - rabbitmq_data:/var/lib/rabbitmq
+    mem_limit: 6g
+
+volumes:
+    4you-database:
+        driver: local
+    rabbitmq_data:
+        driver: local
+    pgadmin-data:
+        driver: local
+
+networks:
+    4younetwork:
+        driver: bridge
