@@ -1,0 +1,11 @@
+{
+    "name": "RenderCore",
+    "alias": "rendercore",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\RenderCore\\Providers\\RenderCoreServiceProvider"
+    ],
+    "files": []
+}

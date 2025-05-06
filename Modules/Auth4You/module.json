@@ -1,0 +1,11 @@
+{
+    "name": "Auth4You",
+    "alias": "auth4you",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Auth4You\\Providers\\Auth4YouServiceProvider"
+    ],
+    "files": []
+}

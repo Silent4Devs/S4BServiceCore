@@ -1,0 +1,28 @@
+{
+    "name": "nwidart/auth4you",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Auth4You\\": "App/",
+            "Modules\\Auth4You\\Database\\Factories\\": "database/factories/",
+            "Modules\\Auth4You\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Auth4You\\Tests\\": "tests/"
+        }
+    }
+}

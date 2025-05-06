@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/rendercore",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\RenderCore\\": "app/",
+            "Modules\\RenderCore\\Database\\Factories\\": "database/factories/",
+            "Modules\\RenderCore\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\RenderCore\\Tests\\": "tests/"
+        }
+    }
+}
