@@ -1,22 +1,3 @@
-# services:
-#     backend:
-#         build: .
-#         ports:
-#             - "8000:8000"
-#         volumes:
-#             - .:/var/www/html
-#             - ./infra/php/php.ini:/usr/local/etc/php/php.ini
-#             - ./infra/php/www.conf:/usr/local/etc/php-fpm.d/www.conf
-#         container_name: backend
-#         restart: unless-stopped
-#         networks:
-#             - corenetwork
-
-
-# networks:
-#   corenetwork:
-#     driver: bridge
-
 services:
   nginx-4you:
     image: nginx:stable-alpine
@@ -164,8 +145,6 @@ volumes:
     4you-database:
         driver: local
     rabbitmq_data:
-        driver: local
-    pgadmin-data:
         driver: local
 
 networks:
