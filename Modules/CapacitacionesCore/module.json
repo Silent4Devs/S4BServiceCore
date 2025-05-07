@@ -1,0 +1,11 @@
+{
+    "name": "CapacitacionesCore",
+    "alias": "capacitacionescore",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\CapacitacionesCore\\Providers\\CapacitacionesCoreServiceProvider"
+    ],
+    "files": []
+}
