@@ -4,7 +4,7 @@ namespace Modules\Stripe\Providers;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Modules\Stripe\App\Http\Api\Middleware\S4BStripeKeyMiddleware;
+use Modules\Stripe\App\Http\Api\Middleware\S4BStripeKeyMiddleware1;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -19,7 +19,7 @@ class RouteServiceProvider extends ServiceProvider
     {
         parent::boot();
 
-        Route::aliasMiddleware('stripe.key', S4BStripeKeyMiddleware::class);
+        Route::aliasMiddleware('stripe.key', S4BStripeKeyMiddleware1::class);
     }
 
     /**

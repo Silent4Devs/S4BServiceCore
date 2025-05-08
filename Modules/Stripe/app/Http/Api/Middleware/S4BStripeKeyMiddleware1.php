@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class S4BStripeKeyMiddleware
+class S4BStripeKeyMiddleware1
 {
     public function handle(Request $request, Closure $next): Response
     {
