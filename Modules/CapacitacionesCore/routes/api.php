@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Auth4You\App\Http\Api\capApiControllerAuthCapacitaciones;
 use Modules\CapacitacionesCore\app\Http\Api\capApiControllerCapacitaciones;
 use Modules\CapacitacionesCore\app\Http\Api\capApiControllerInstructorCapacitaciones;
 
@@ -29,6 +30,20 @@ Route::get('/test', function () {
 });
 
 Route::prefix('capacitaciones')->group(function () {
+
+    Route::post('register',                 [capApiControllerAuthCapacitaciones::class, 'register']);
+    Route::post('login',                    [capApiControllerAuthCapacitaciones::class, 'login']);
+    Route::post('forgot-password',          [capApiControllerAuthCapacitaciones::class, 'forgotPassword']);
+    Route::post('reset-password',           [capApiControllerAuthCapacitaciones::class, 'resetPassword']);
+
+    // Route::middleware('auth:api')->group(function () {
+    //     Route::post('logout',                   [capApiControllerAuthCapacitaciones::class, 'logout']);
+    //     Route::post('verify-2fa',               [capApiControllerAuthCapacitaciones::class, 'verify2FA']);
+    //     Route::post('disable-2fa',              [capApiControllerAuthCapacitaciones::class, 'disable2FA']);
+    //     Route::post('enable-2fa',               [capApiControllerAuthCapacitaciones::class, 'enable2FA']);
+    //     Route::get('me', [capApiControllerAuthCapacitaciones::class, 'me']);
+    // });
+
     Route::get('/capLastcourse', [capApiControllerCapacitaciones::class, 'capFunctionUltimoCurso']);
     Route::get('/capInscribedcourses', [capApiControllerCapacitaciones::class, 'capFunctionCursosInscrito']);
     Route::get('/capCoursecatalogue', [capApiControllerCapacitaciones::class, 'capFunctionCatalogoCursos']);
