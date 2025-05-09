@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Stripe\App\Http\Api\Controllers\Payment\S4BStripePaymentMetodController;
-use Modules\Stripe\App\Http\Api\Controllers\Product\S4BStripeProductMetodController;
+use Modules\Stripe\app\Http\Api\Controllers\Payment\S4BStripePaymentMetodController;
+use Modules\Stripe\app\Http\Api\Controllers\Product\S4BStripeProductMetodController;
 
 /*
  *--------------------------------------------------------------------------

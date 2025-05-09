@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Stripe\App\Http\Api\Middleware;
+namespace Modules\Stripe\app\Http\Api\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;

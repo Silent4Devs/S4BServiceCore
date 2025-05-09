@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Stripe\App\Http\Api\Controllers\Utilities;
+namespace Modules\Stripe\app\Http\Api\Controllers\Utilities;
 
 
 use App\Http\Controllers\S4BBaseController;

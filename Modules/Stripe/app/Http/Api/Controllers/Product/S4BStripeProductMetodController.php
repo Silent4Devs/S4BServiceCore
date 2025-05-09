@@ -1,9 +1,9 @@
 <?php
 
-namespace Modules\Stripe\App\Http\Api\Controllers\Product;
+namespace Modules\Stripe\app\Http\Api\Controllers\Product;
 
 use App\Http\Controllers\S4BBaseController;
-use Modules\Stripe\App\Http\Api\Services\S4BStripeService;
+use Modules\Stripe\app\Http\Api\Services\S4BStripeService;
 use Illuminate\Http\Request;
 
 class S4BStripeProductMetodController extends S4BBaseController

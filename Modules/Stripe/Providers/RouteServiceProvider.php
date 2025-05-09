@@ -4,7 +4,7 @@ namespace Modules\Stripe\Providers;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Modules\Stripe\App\Http\Api\Middleware\S4BStripeKeyMiddleware1;
+use Modules\Stripe\app\Http\Api\Middleware\S4BStripeKeyMiddleware1;
 
 class RouteServiceProvider extends ServiceProvider
 {
