@@ -1,11 +1,11 @@
 <?php
 
-namespace Modules\Stripe\App\Http\Api\Controllers\Payment;
+namespace Modules\Stripe\app\Http\Api\Controllers\Payment;
 
 use App\Http\Controllers\S4BBaseController;
-use Modules\Stripe\App\Http\Api\Services\S4BStripeService;
+use Modules\Stripe\app\Http\Api\Services\S4BStripeService;
 use Illuminate\Http\Request;
-use Modules\Stripe\App\Http\Api\Controllers\Utilities\S4BStripeUtilities;
+use Modules\Stripe\app\Http\Api\Controllers\Utilities\S4BStripeUtilities;
 
 class S4BStripePaymentMetodController extends S4BBaseController
 {

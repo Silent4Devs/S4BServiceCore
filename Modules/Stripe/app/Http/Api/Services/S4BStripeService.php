@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Stripe\App\Http\Api\Services;
+namespace Modules\Stripe\app\Http\Api\Services;
 
 use Exception;
 use Stripe\Stripe;
