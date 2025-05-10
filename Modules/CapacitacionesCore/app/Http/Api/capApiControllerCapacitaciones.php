@@ -12,7 +12,7 @@ use Modules\CapacitacionesCore\App\Models\Escuela\Instructor\UserAnswer;
 use Modules\CapacitacionesCore\App\Models\Escuela\Level;
 use Modules\CapacitacionesCore\App\Models\Escuela\UserEvaluation;
 use Modules\CapacitacionesCore\App\Models\Escuela\UsuariosCursos;
-use App\Models\User;
+use Modules\CapacitacionesCore\App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -49,6 +49,7 @@ class capApiControllerCapacitaciones extends Controller
             'title' => $course->title,
             'subtitle' => $course->subtitle,
             'nombre_instructor' => $course->instructor->name,
+            'image' => $course->image->url ?? null,
         ];
     }
 
@@ -163,6 +164,7 @@ class capApiControllerCapacitaciones extends Controller
             'course_progress' => $course_user->completado,
             'course_certificate' => $course_user->curso->certificado,
             'nombre_instructor' => $ultimo->cursos->user->name,
+            'image' => $course->image->url ?? null,
         ];
 
         return response(json_encode(
@@ -198,6 +200,7 @@ class capApiControllerCapacitaciones extends Controller
                 'course_progress' => $cou->completado,
                 'course_certificate' => $cou->curso->certificado,
                 'nombre_instructor' => $cu->cursos->instructor->name ?? $cu->cursos->teacher->name,
+                'image' => $course->image->url ?? null,
             ];
         }
 
@@ -234,6 +237,9 @@ class capApiControllerCapacitaciones extends Controller
                 'colaboradores_inscritos' => $course->students_count,
                 'nombre_instructor' => $course->instructor->name,
                 // 'course_progress' => $course->advance, // Not useful, not enrolled in these courses.
+                'image' => $course->image->url ?? null,
+                'video_introduction' => null,
+                'goals' => null,
             ];
 
             $courses_lessons = $course->lessons;
@@ -292,6 +298,10 @@ class capApiControllerCapacitaciones extends Controller
             'course_certificate' => $course->certificado,
             'colaboradores_inscritos' => $course->students_count,
             'nombre_instructor' => $course->instructor->name,
+            'image' => $course->image->url ?? null,
+            'video_introduction' => null,
+            'goals' => null,
+            'section' => null,
         ];
 
         $courses_lessons = $course->lessons;
@@ -434,6 +444,8 @@ class capApiControllerCapacitaciones extends Controller
             'subtitle' => $course->subtitle,
             'course_progress' => $course_user->completado,
             'nombre_instructor' => $course->instructor->name,
+            'image' => $course->image->url ?? null,
+            'section' => null,
         ];
 
         foreach ($course->sections_order as $keySections => $section) {

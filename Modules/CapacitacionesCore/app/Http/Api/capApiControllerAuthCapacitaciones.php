@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Auth4You\App\Http\Api;
+namespace Modules\CapacitacionesCore\App\Http\Api;
 
 use App\Http\Controllers\S4BBaseController;
 use Illuminate\Http\Request;
@@ -25,6 +25,7 @@ class capApiControllerAuthCapacitaciones extends S4BBaseController
             if (!$stripeKey) {
                 return response()->json(['error' => 'Stripe API Key es requerida'], 400);
             }
+
             \Stripe\Stripe::setApiKey($stripeKey);
 
             $validator = Validator::make($request->all(), [
@@ -34,9 +35,10 @@ class capApiControllerAuthCapacitaciones extends S4BBaseController
                 // 'role_id' => 'required|exists:roles,id',
             ]);
 
-            if ($validator->fails()) {
-                return response()->json($validator->errors(), 422);
-            }
+            // if ($validator->fails()) {
+            //     return response()->json($validator->errors(), 422);
+            //     dd(4, $validator->fails());
+            // }
 
             $user = User::create([
                 'name' => $request->name,

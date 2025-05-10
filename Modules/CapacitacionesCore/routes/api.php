@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Modules\Auth4You\App\Http\Api\capApiControllerAuthCapacitaciones;
+use Modules\CapacitacionesCore\App\Http\Api\capApiControllerAuthCapacitaciones;
 use Modules\CapacitacionesCore\app\Http\Api\capApiControllerCapacitaciones;
 use Modules\CapacitacionesCore\app\Http\Api\capApiControllerInstructorCapacitaciones;
 
